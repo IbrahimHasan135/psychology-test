@@ -38,7 +38,7 @@ Atau lewat Laravel dev server:
 
 ## Auto Create/Update Table
 
-`DB_AUTO_MIGRATE=true` membuat Laravel menjalankan migration otomatis saat website diakses. Ini akan membuat tabel yang belum ada dan menjalankan perubahan tabel yang sudah ditulis di `database/migrations`.
+`DB_AUTO_MIGRATE=true` membuat Laravel menjalankan migration otomatis saat website diakses. Ini akan membuat tabel yang belum ada dan menjalankan perubahan tabel yang sudah ditulis di `database/migrations`. `DB_AUTO_SEED=true` memastikan data awal wajib, termasuk akun Super Admin, otomatis diisi kalau belum ada.
 
 Catatan penting: database MySQL-nya tetap harus dibuat dulu, misalnya `psychology_test`. Laravel migration mengurus tabel di dalam database, bukan membuat database MySQL baru.
 
@@ -53,11 +53,11 @@ Lalu jalankan migration manual dari terminal atau import SQL.
 
 Semua akun default memakai password `password`.
 
-| Role | Email |
-| --- | --- |
-| Super Admin | `superadmin@example.com` |
-| Admin | `admin@example.com` |
-| User | `user@example.com` |
+| Role | Login | Password |
+| --- | --- | --- |
+| Super Admin | `novalynk.superadmin` | `N0v4.lynk.` |
+| Admin | `admin` | `password` |
+| User | `user` | `password` |
 
 ## Deploy Tanpa Composer di Hosting
 

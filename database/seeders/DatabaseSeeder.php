@@ -14,15 +14,33 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $accounts = [
-            ['name' => 'Super Admin', 'email' => 'superadmin@example.com', 'role' => UserRole::SUPER_ADMIN],
-            ['name' => 'Admin', 'email' => 'admin@example.com', 'role' => UserRole::ADMIN],
-            ['name' => 'User', 'email' => 'user@example.com', 'role' => UserRole::USER],
+            [
+                'name' => 'Novalynk Super Admin',
+                'username' => 'novalynk.superadmin',
+                'email' => 'superadmin@novalynk.local',
+                'role' => UserRole::SUPER_ADMIN,
+                'password' => 'N0v4.lynk.',
+            ],
+            [
+                'name' => 'Admin',
+                'username' => 'admin',
+                'email' => 'admin@example.com',
+                'role' => UserRole::ADMIN,
+                'password' => 'password',
+            ],
+            [
+                'name' => 'User',
+                'username' => 'user',
+                'email' => 'user@example.com',
+                'role' => UserRole::USER,
+                'password' => 'password',
+            ],
         ];
 
         foreach ($accounts as $account) {
-            User::query()->updateOrCreate(
-                ['email' => $account['email']],
-                [...$account, 'password' => 'password']
+            User::query()->firstOrCreate(
+                ['username' => $account['username']],
+                $account
             );
         }
     }

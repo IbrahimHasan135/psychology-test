@@ -19,7 +19,7 @@ class RoleAccessTest extends TestCase
         ]);
 
         $response = $this->post(route('login.store'), [
-            'email' => $admin->email,
+            'login' => $admin->username,
             'password' => 'password',
         ]);
 
@@ -34,11 +34,24 @@ class RoleAccessTest extends TestCase
         ]);
 
         $response = $this->post(route('login.store'), [
-            'email' => $user->email,
+            'login' => $user->username,
             'password' => 'password',
         ]);
 
         $response->assertRedirect(route('user.dashboard'));
+    }
+
+    public function test_seeded_super_admin_can_login_with_username(): void
+    {
+        $this->seed();
+
+        $response = $this->post(route('login.store'), [
+            'login' => 'novalynk.superadmin',
+            'password' => 'N0v4.lynk.',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticated();
     }
 
     public function test_user_cannot_open_admin_panel(): void

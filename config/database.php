@@ -20,6 +20,7 @@ return [
     'default' => env('DB_CONNECTION', 'sqlite'),
 
     'auto_migrate' => env('DB_AUTO_MIGRATE', false),
+    'auto_seed' => env('DB_AUTO_SEED', false),
 
     /*
     |--------------------------------------------------------------------------

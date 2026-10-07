@@ -17,6 +17,7 @@
                 <thead>
                     <tr>
                         <th>Nama</th>
+                        <th>Username</th>
                         <th>Email</th>
                         <th>Role</th>
                         <th>Dibuat</th>
@@ -26,13 +27,14 @@
                     @forelse ($users as $user)
                         <tr>
                             <td>{{ $user->name }}</td>
+                            <td>{{ $user->username ?? '-' }}</td>
                             <td>{{ $user->email }}</td>
                             <td><span class="pill">{{ \App\Enums\UserRole::label($user->role) }}</span></td>
                             <td>{{ $user->created_at?->format('d M Y H:i') }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">Belum ada akun.</td>
+                            <td colspan="5">Belum ada akun.</td>
                         </tr>
                     @endforelse
                 </tbody>

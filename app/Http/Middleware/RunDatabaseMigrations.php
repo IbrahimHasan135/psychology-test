@@ -12,13 +12,13 @@ class RunDatabaseMigrations
     public function handle($request, Closure $next)
     {
         if (config('database.auto_migrate')) {
-            $this->runMigrations();
+            $this->runMigrationsAndSeeders();
         }
 
         return $next($request);
     }
 
-    private function runMigrations(): void
+    private function runMigrationsAndSeeders(): void
     {
         $lock = Cache::lock('database-auto-migrate', 30);
 
@@ -30,6 +30,12 @@ class RunDatabaseMigrations
             Artisan::call('migrate', [
                 '--force' => true,
             ]);
+
+            if (config('database.auto_seed')) {
+                Artisan::call('db:seed', [
+                    '--force' => true,
+                ]);
+            }
         } catch (Throwable $exception) {
             report($exception);
         } finally {

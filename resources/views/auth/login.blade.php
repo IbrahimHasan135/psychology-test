@@ -9,9 +9,9 @@
 
         <form method="POST" action="{{ route('login.store') }}">
             @csrf
-            <label for="email">Email</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus>
-            @error('email')
+            <label for="login">Username atau Email</label>
+            <input id="login" type="text" name="login" value="{{ old('login') }}" autocomplete="username" required autofocus>
+            @error('login')
                 <div class="field-error">{{ $message }}</div>
             @enderror
 
