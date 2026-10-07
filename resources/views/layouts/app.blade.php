@@ -79,6 +79,10 @@
         label { display: block; font-size: 13px; font-weight: 800; margin: 18px 0 8px; color: var(--green-950); }
         input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 13px 14px; font: inherit; color: var(--ink); background: white; }
         input:focus { outline: 3px solid rgba(39, 179, 106, .18); border-color: var(--green-500); }
+        .password-field { position: relative; }
+        .password-field input { padding-right: 86px; }
+        .password-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; background: var(--mint); color: var(--green-900); font-weight: 800; cursor: pointer; }
+        .password-toggle:hover { border-color: var(--green-500); }
         .field-error { color: #b42318; font-size: 13px; margin-top: 8px; }
         .checkbox-row { display: flex; align-items: center; gap: 10px; margin: 16px 0 22px; color: var(--muted); font-size: 14px; }
         .checkbox-row input { width: 16px; height: 16px; }

@@ -16,7 +16,10 @@
             @enderror
 
             <label for="password">Password</label>
-            <input id="password" type="password" name="password" autocomplete="current-password" required>
+            <div class="password-field">
+                <input id="password" type="password" name="password" autocomplete="current-password" required>
+                <button class="password-toggle" type="button" data-password-toggle="password" aria-label="Lihat password">Lihat</button>
+            </div>
             @error('password')
                 <div class="field-error">{{ $message }}</div>
             @enderror
@@ -30,4 +33,17 @@
         </form>
     </section>
 </main>
+<script>
+    document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const input = document.getElementById(button.dataset.passwordToggle);
+            if (!input) return;
+
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            button.textContent = isHidden ? 'Tutup' : 'Lihat';
+            button.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Lihat password');
+        });
+    });
+</script>
 @endsection
