@@ -1,37 +1,41 @@
-@extends('layouts.app', ['title' => 'Psychology Test'])
+@extends('layouts.app', ['title' => $page?->name ?? 'Home'])
 
 @section('content')
-<main class="page">
-    <section class="hero">
-        <div>
-            <div class="eyebrow">Laravel base app</div>
-            <h1>Psychology Test</h1>
-            <p>Fondasi website dan admin panel untuk pengembangan bertahap: akun, role, dashboard, dan struktur modul yang siap ditambah fitur tes psikologi, laporan, atau integrasi IoT.</p>
-            <div class="hero-actions">
-                <a class="button button-primary" href="{{ route('login') }}">Masuk</a>
-                @auth
-                    <a class="button button-soft" href="{{ route(auth()->user()->dashboardRoute()) }}">Buka Dashboard</a>
-                @endauth
-            </div>
-        </div>
-        <img class="hero-art" src="{{ asset('images/base-dashboard.svg') }}" alt="Dashboard preview">
-    </section>
+<main class="website-page">
+    @if ($page && $page->activeSections->isNotEmpty())
+        @if ($page->display_mode === 'tabs')
+            <nav class="website-tabs page" aria-label="Website tabs">
+                @foreach ($page->activeSections as $section)
+                    <a href="#{{ $section->anchor ?: 'section-'.$section->id }}">{{ $section->title }}</a>
+                @endforeach
+            </nav>
+        @endif
 
-    <section class="section">
-        <div class="grid-3">
-            <article class="card">
-                <h3>Website utama</h3>
-                <p>Halaman publik sebagai pintu masuk awal sebelum user login dan diarahkan sesuai rolenya.</p>
-            </article>
-            <article class="card">
-                <h3>Admin panel</h3>
-                <p>Area kerja Super Admin dan Admin untuk mengelola akun, konfigurasi, dan fitur internal.</p>
-            </article>
-            <article class="card">
-                <h3>Role access</h3>
-                <p>Middleware role memisahkan akses Super Admin, Admin, dan User sejak awal.</p>
-            </article>
-        </div>
-    </section>
+        @foreach ($page->activeSections as $section)
+            <section class="website-section" id="{{ $section->anchor ?: 'section-'.$section->id }}">
+                <div class="page">
+                    <div class="section-heading">
+                        <h2>{{ $section->title }}</h2>
+                        @if ($section->description)
+                            <p>{{ $section->description }}</p>
+                        @endif
+                    </div>
+                    <div class="website-card-grid">
+                        @foreach ($section->activeCards as $card)
+                            @includeIf('website.card-templates.'.$card->template, ['card' => $card])
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+        @endforeach
+    @else
+        <section class="blank-home page">
+            @auth
+                <a class="button button-soft" href="{{ route(auth()->user()->dashboardRoute()) }}">Dashboard</a>
+            @else
+                <a class="button button-primary" href="{{ route('login') }}">Login</a>
+            @endauth
+        </section>
+    @endif
 </main>
 @endsection

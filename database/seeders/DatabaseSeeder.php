@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\UserRole;
+use App\Models\SitePage;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -43,5 +44,14 @@ class DatabaseSeeder extends Seeder
                 $account
             );
         }
+
+        SitePage::query()->firstOrCreate(
+            ['slug' => 'home'],
+            [
+                'name' => 'Home',
+                'display_mode' => 'sections',
+                'is_published' => true,
+            ]
+        );
     }
 }

@@ -42,3 +42,15 @@ DB_PASSWORD=
 ```
 
 Buat database `psychology_test` di phpMyAdmin atau MySQL CLI, lalu jalankan migration dan seeder.
+## Website Page Builder
+
+Modul website builder dipisahkan antara data konten dan template desain.
+
+- `site_pages`: page utama, saat ini seed default membuat `home`.
+- `site_sections`: section atau tab di dalam page. Mode page menentukan apakah tampil sebagai scroll section atau tab anchor.
+- `site_cards`: unit konten di dalam section. Card menyimpan template, judul, teks, URL gambar, posisi gambar, tombol, urutan, dan status aktif.
+- `resources/views/website/card-templates`: tempat desain Blade untuk tiap template card. Tambah template baru di sini, lalu daftarkan key-nya di `App\Models\SiteCard::TEMPLATES`.
+- `resources/views/website/home.blade.php`: renderer publik yang membaca data dari database.
+- `app/Http/Controllers/Admin/PageManagementController.php`: fitur admin untuk mengatur page, section/tab, dan card.
+
+Pola next feature: jangan campur logika konten dengan layout visual. Data tetap di model/tabel; desain tampilan tetap di Blade partial template.

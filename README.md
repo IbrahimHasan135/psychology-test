@@ -71,6 +71,10 @@ php artisan migrate --seed
 
 Kalau hosting tidak punya terminal, jalankan migration di local lalu export/import SQL ke database hosting.
 
+## Page Management
+
+Admin panel punya menu `Page Management` untuk mengatur Home page. Mode tampilannya bisa `Section scroll` atau `Tabs`. Isi website dibangun dari section/tab dan card. Desain card dipisahkan di `resources/views/website/card-templates`, sehingga next project bisa mengganti template visual tanpa mengubah data konten.
+
 ## Struktur Fitur
 
 - Website utama: `WebsiteController`, `resources/views/website`.
