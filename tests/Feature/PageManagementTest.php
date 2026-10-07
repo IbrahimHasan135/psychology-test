@@ -57,4 +57,29 @@ class PageManagementTest extends TestCase
             ->assertSee('Intro')
             ->assertSee('Card pertama');
     }
+    public function test_admin_can_delete_card(): void
+    {
+        $this->seed();
+        $admin = User::factory()->create(['role' => UserRole::ADMIN]);
+        $page = SitePage::query()->where('slug', 'home')->firstOrFail();
+        $section = $page->sections()->create([
+            'title' => 'Intro',
+            'anchor' => 'intro',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+        $card = $section->cards()->create([
+            'template' => 'feature',
+            'title' => 'Card hapus',
+            'image_position' => 'left',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.cards.destroy', $card))
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('site_cards', ['id' => $card->id]);
+    }
 }

@@ -78,7 +78,8 @@
         .auth-card { width: min(100%, 440px); background: white; border: 1px solid var(--line); border-radius: 8px; padding: 28px; box-shadow: 0 24px 70px rgba(5, 46, 36, .14); }
         label { display: block; font-size: 13px; font-weight: 800; margin: 18px 0 8px; color: var(--green-950); }
         input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 13px 14px; font: inherit; color: var(--ink); background: white; }
-        textarea { resize: vertical; }        input:focus, select:focus, textarea:focus { outline: 3px solid rgba(39, 179, 106, .18); border-color: var(--green-500); }
+        textarea { resize: vertical; }
+        input:focus, select:focus, textarea:focus { outline: 3px solid rgba(39, 179, 106, .18); border-color: var(--green-500); }
         .password-field { position: relative; }
         .password-field input { padding-right: 86px; }
         .password-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; background: var(--mint); color: var(--green-900); font-weight: 800; cursor: pointer; }
@@ -127,13 +128,50 @@
         .site-card-feature.image-right, .site-card-media.image-right { grid-template-columns: minmax(0, 1.2fr) minmax(220px, .8fr); }
         .site-card-feature.image-right img, .site-card-media.image-right img { order: 2; }
         .site-card-feature.image-top, .site-card-media.image-top { grid-template-columns: 1fr; }
-        .site-card-compact { max-width: 760px; }        @media (max-width: 860px) {
+        .site-card-compact { max-width: 760px; }
+        .page-studio { background: #f7fbf8; }
+        .studio-topbar { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
+        .studio-topbar h2 { margin-bottom: 8px; }
+        .studio-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+        .error-notice { border-color: #ffd2cc; background: #fff1f0; color: #b42318; }
+        .studio-board { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start; }
+        .studio-settings { position: sticky; top: 94px; background: white; border: 1px solid var(--line); border-radius: 8px; padding: 18px; box-shadow: 0 12px 34px rgba(5, 46, 36, .06); }
+        .studio-settings h3 { font-size: 16px; margin-bottom: 12px; }
+        .studio-form { display: grid; gap: 10px; }
+        .studio-form label { margin: 0; }
+        .studio-divider { height: 1px; background: var(--line); margin: 18px 0; }
+        .studio-canvas { display: grid; gap: 18px; }
+        .studio-section { background: white; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 14px 36px rgba(5, 46, 36, .06); overflow: hidden; }
+        .studio-section-head { padding: 18px 20px; border-bottom: 1px solid var(--line); background: #fbfefc; }
+        .studio-section-head h3 { margin: 4px 0 4px; }
+        .studio-section-head p { margin: 0; font-size: 13px; }
+        .section-index { display: inline-flex; color: var(--green-700); font-size: 12px; font-weight: 900; }
+        .section-quick-edit { display: grid; grid-template-columns: minmax(160px, 1.2fr) minmax(120px, .8fr) 90px 110px; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); align-items: center; }
+        .section-quick-edit textarea { grid-column: 1 / -2; }
+        .section-quick-edit button { align-self: stretch; }
+        .card-stack { display: grid; gap: 12px; padding: 18px 20px 0; }
+        .studio-card { border: 1px solid var(--line); border-radius: 8px; background: white; overflow: hidden; }
+        .studio-card summary { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; cursor: pointer; background: #f7fbf8; }
+        .studio-card summary strong { display: block; color: var(--green-950); }
+        .studio-card summary small { display: block; color: var(--muted); margin-top: 3px; }
+        .card-editor-form { padding: 16px; border-top: 1px solid var(--line); }
+        .card-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+        .card-delete-form { display: flex; justify-content: flex-end; padding: 0 16px 16px; }
+        .new-studio-card { margin: 18px 20px 20px; border-style: dashed; background: #fbfefc; }
+        .new-studio-card summary { background: #effbf2; }
+        @media (max-width: 860px) {
             .hero { grid-template-columns: 1fr; padding-top: 38px; }
             .grid-3 { grid-template-columns: 1fr; }
             .app-layout { grid-template-columns: 1fr; }
             .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
             .topbar { height: auto; min-height: 72px; padding-top: 14px; padding-bottom: 14px; align-items: flex-start; }
             .form-grid { grid-template-columns: 1fr; }
+            .studio-board { grid-template-columns: 1fr; }
+            .studio-settings { position: static; }
+            .studio-topbar { display: block; }
+            .studio-actions { justify-content: flex-start; margin-top: 12px; }
+            .section-quick-edit { grid-template-columns: 1fr; }
+            .section-quick-edit textarea { grid-column: auto; }
             .site-card-feature, .site-card-media, .site-card-feature.image-right, .site-card-media.image-right { grid-template-columns: 1fr; }
             .site-card-feature.image-right img, .site-card-media.image-right img { order: 0; }
         }
@@ -147,7 +185,6 @@
             <span>{{ config('app.name', 'Psychology Test') }}</span>
         </a>
         <nav class="nav">
-            <a href="{{ route('home') }}">Website</a>
             @auth
                 <a href="{{ route(auth()->user()->dashboardRoute()) }}">Dashboard</a>
                 <form method="POST" action="{{ route('logout') }}">
