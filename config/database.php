@@ -19,6 +19,8 @@ return [
 
     'default' => env('DB_CONNECTION', 'sqlite'),
 
+    'auto_migrate' => env('DB_AUTO_MIGRATE', false),
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections

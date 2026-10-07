@@ -36,6 +36,19 @@ Atau lewat Laravel dev server:
 /opt/lampp/bin/php artisan serve
 ```
 
+## Auto Create/Update Table
+
+`DB_AUTO_MIGRATE=true` membuat Laravel menjalankan migration otomatis saat website diakses. Ini akan membuat tabel yang belum ada dan menjalankan perubahan tabel yang sudah ditulis di `database/migrations`.
+
+Catatan penting: database MySQL-nya tetap harus dibuat dulu, misalnya `psychology_test`. Laravel migration mengurus tabel di dalam database, bukan membuat database MySQL baru.
+
+Kalau di hosting production ingin lebih aman, ubah ke:
+
+```env
+DB_AUTO_MIGRATE=false
+```
+
+Lalu jalankan migration manual dari terminal atau import SQL.
 ## Akun Default
 
 Semua akun default memakai password `password`.
