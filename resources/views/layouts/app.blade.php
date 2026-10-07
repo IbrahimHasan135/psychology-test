@@ -149,7 +149,7 @@
         .studio-divider { height: 1px; background: var(--line); margin: 18px 0; }
         .studio-canvas { display: grid; gap: 18px; }
         .studio-section { background: white; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 14px 36px rgba(5, 46, 36, .06); overflow: hidden; }
-        .studio-section-head { padding: 18px 20px; border-bottom: 1px solid var(--line); background: #fbfefc; }
+        .studio-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 18px 20px; border-bottom: 1px solid var(--line); background: #fbfefc; }
         .studio-section-head h3 { margin: 4px 0 4px; }
         .studio-section-head p { margin: 0; font-size: 13px; }
         .section-index { display: inline-flex; color: var(--green-700); font-size: 12px; font-weight: 900; }
@@ -162,8 +162,11 @@
         .visual-card-head h4 { margin: 4px 0; color: var(--green-950); }
         .visual-card-head p { margin: 0; font-size: 13px; }
         .card-type { color: var(--green-700); font-size: 12px; font-weight: 900; text-transform: uppercase; }
+        .card-delete-hint { color: #b42318; font-size: 12px; font-weight: 900; text-transform: uppercase; white-space: nowrap; }
         .card-live-preview { padding: 16px; background: #f7fbf8; }
         .card-live-preview .site-card { box-shadow: none; }
+        .always-delete-card { display: flex; justify-content: flex-end; padding: 0 16px 16px; background: #f7fbf8; }
+        .delete-card-button { font-weight: 900; border-color: #ffb4a8; }
         .card-edit-panel { border-top: 1px solid var(--line); }
         .card-edit-panel summary { padding: 12px 16px; cursor: pointer; color: var(--green-900); font-weight: 900; background: white; }
         .studio-card { border: 1px solid var(--line); border-radius: 8px; background: white; overflow: hidden; }

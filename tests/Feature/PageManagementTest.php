@@ -57,6 +57,7 @@ class PageManagementTest extends TestCase
             ->assertSee('Intro')
             ->assertSee('Card pertama');
     }
+
     public function test_admin_can_delete_card(): void
     {
         $this->seed();
@@ -80,6 +81,33 @@ class PageManagementTest extends TestCase
             ->post(route('admin.cards.delete', $card))
             ->assertRedirect();
 
+        $this->assertDatabaseMissing('site_cards', ['id' => $card->id]);
+    }
+
+    public function test_admin_can_delete_section_with_cards(): void
+    {
+        $this->seed();
+        $admin = User::factory()->create(['role' => UserRole::ADMIN]);
+        $page = SitePage::query()->where('slug', 'home')->firstOrFail();
+        $section = $page->sections()->create([
+            'title' => 'Section hapus',
+            'anchor' => 'section-hapus',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+        $card = $section->cards()->create([
+            'template' => 'feature',
+            'title' => 'Card ikut hapus',
+            'image_position' => 'left',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.sections.delete', $section))
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('site_sections', ['id' => $section->id]);
         $this->assertDatabaseMissing('site_cards', ['id' => $card->id]);
     }
 }

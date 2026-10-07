@@ -77,6 +77,10 @@
                                 <h3>{{ $section->title }}</h3>
                                 <p>#{{ $section->anchor }} · {{ $section->cards->count() }} card · {{ $section->is_active ? 'aktif' : 'nonaktif' }}</p>
                             </div>
+                            <form method="POST" action="{{ route('admin.sections.delete', $section) }}" onsubmit="return confirm('Hapus section ini beserta semua card di dalamnya?')">
+                                @csrf
+                                <button class="button danger-button" type="submit">HAPUS SECTION</button>
+                            </form>
                         </div>
 
                         <form method="POST" action="{{ route('admin.sections.update', $section) }}" class="section-quick-edit">
@@ -99,15 +103,17 @@
                                             <h4>{{ $card->title }}</h4>
                                             <p>{{ $card->is_active ? 'Aktif' : 'Nonaktif' }} · urutan {{ $card->sort_order }}</p>
                                         </div>
-                                        <form method="POST" action="{{ route('admin.cards.delete', $card) }}" onsubmit="return confirm('Hapus card ini?')">
-                                            @csrf
-                                            <button class="button danger-button" type="submit">Hapus</button>
-                                        </form>
+                                        <span class="card-delete-hint">Tombol hapus ada di bawah preview</span>
                                     </div>
 
                                     <div class="card-live-preview">
                                         @includeIf('website.card-templates.'.$card->template, ['card' => $card])
                                     </div>
+
+                                    <form method="POST" action="{{ route('admin.cards.delete', $card) }}" class="always-delete-card" onsubmit="return confirm('Hapus card ini?')">
+                                        @csrf
+                                        <button class="button danger-button delete-card-button" type="submit">HAPUS CARD</button>
+                                    </form>
 
                                     <details class="card-edit-panel">
                                         <summary>Edit content</summary>

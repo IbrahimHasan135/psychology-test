@@ -82,6 +82,13 @@ class PageManagementController extends Controller
         return back()->with('status', 'Section/tab diperbarui.');
     }
 
+    public function destroySection(SiteSection $section): RedirectResponse
+    {
+        $section->delete();
+
+        return back()->with('status', 'Section dan semua card di dalamnya dihapus.');
+    }
+
     public function storeCard(Request $request, SiteSection $section): RedirectResponse
     {
         $section->cards()->create($this->validateCard($request));

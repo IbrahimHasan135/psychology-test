@@ -31,6 +31,7 @@ Route::middleware(['auth', 'role:'.UserRole::SUPER_ADMIN.','.UserRole::ADMIN])
         Route::put('/pages/{page}', [PageManagementController::class, 'update'])->name('pages.update');
         Route::post('/pages/{page}/sections', [PageManagementController::class, 'storeSection'])->name('pages.sections.store');
         Route::put('/sections/{section}', [PageManagementController::class, 'updateSection'])->name('sections.update');
+        Route::post('/sections/{section}/delete', [PageManagementController::class, 'destroySection'])->name('sections.delete');
         Route::post('/sections/{section}/cards', [PageManagementController::class, 'storeCard'])->name('sections.cards.store');
         Route::put('/cards/{card}', [PageManagementController::class, 'updateCard'])->name('cards.update');
         Route::post('/cards/{card}/delete', [PageManagementController::class, 'destroyCard'])->name('cards.delete');
