@@ -11,9 +11,13 @@ class SiteCard extends Model
     use HasFactory;
 
     public const TEMPLATES = [
+        'hero' => 'Hero Banner',
         'feature' => 'Feature Card',
         'media' => 'Media Split',
         'compact' => 'Compact Info',
+        'stat' => 'Stat Highlight',
+        'quote' => 'Quote Card',
+        'cta' => 'Call To Action',
     ];
 
     public const IMAGE_POSITIONS = [

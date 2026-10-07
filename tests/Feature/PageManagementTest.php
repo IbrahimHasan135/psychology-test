@@ -77,7 +77,7 @@ class PageManagementTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->delete(route('admin.cards.destroy', $card))
+            ->post(route('admin.cards.delete', $card))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('site_cards', ['id' => $card->id]);

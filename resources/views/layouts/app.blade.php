@@ -124,11 +124,18 @@
         .website-card-grid { display: grid; gap: 16px; }
         .site-card { border: 1px solid var(--line); border-radius: 8px; background: white; padding: 22px; box-shadow: 0 16px 40px rgba(5, 46, 36, .06); }
         .site-card img { width: 100%; border-radius: 8px; object-fit: cover; max-height: 320px; background: var(--mint); }
-        .site-card-feature, .site-card-media { display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr); gap: 22px; align-items: center; }
-        .site-card-feature.image-right, .site-card-media.image-right { grid-template-columns: minmax(0, 1.2fr) minmax(220px, .8fr); }
+        .site-card-feature, .site-card-media, .site-card-hero { display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr); gap: 22px; align-items: center; }
+        .site-card-feature.image-right, .site-card-media.image-right, .site-card-hero.image-right { grid-template-columns: minmax(0, 1.2fr) minmax(220px, .8fr); }
         .site-card-feature.image-right img, .site-card-media.image-right img { order: 2; }
-        .site-card-feature.image-top, .site-card-media.image-top { grid-template-columns: 1fr; }
+        .site-card-hero.image-left img { order: -1; }
+        .site-card-feature.image-top, .site-card-media.image-top, .site-card-hero.image-top { grid-template-columns: 1fr; }
         .site-card-compact { max-width: 760px; }
+        .site-card-hero { background: #063f31; color: white; padding: 30px; }
+        .site-card-hero h3, .site-card-hero p { color: white; }
+        .site-card-stat strong { display: block; color: var(--green-800); font-size: clamp(30px, 6vw, 64px); line-height: 1; margin-bottom: 10px; }
+        .site-card-quote { border-left: 6px solid var(--green-500); }
+        .site-card-quote p { color: var(--green-950); font-size: 22px; line-height: 1.45; }
+        .site-card-cta { display: flex; align-items: center; justify-content: space-between; gap: 18px; background: #effbf2; }
         .page-studio { background: #f7fbf8; }
         .studio-topbar { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
         .studio-topbar h2 { margin-bottom: 8px; }
@@ -150,6 +157,15 @@
         .section-quick-edit textarea { grid-column: 1 / -2; }
         .section-quick-edit button { align-self: stretch; }
         .card-stack { display: grid; gap: 12px; padding: 18px 20px 0; }
+        .visual-card-editor { border: 1px solid var(--line); border-radius: 8px; background: white; overflow: hidden; }
+        .visual-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); background: #fbfefc; }
+        .visual-card-head h4 { margin: 4px 0; color: var(--green-950); }
+        .visual-card-head p { margin: 0; font-size: 13px; }
+        .card-type { color: var(--green-700); font-size: 12px; font-weight: 900; text-transform: uppercase; }
+        .card-live-preview { padding: 16px; background: #f7fbf8; }
+        .card-live-preview .site-card { box-shadow: none; }
+        .card-edit-panel { border-top: 1px solid var(--line); }
+        .card-edit-panel summary { padding: 12px 16px; cursor: pointer; color: var(--green-900); font-weight: 900; background: white; }
         .studio-card { border: 1px solid var(--line); border-radius: 8px; background: white; overflow: hidden; }
         .studio-card summary { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; cursor: pointer; background: #f7fbf8; }
         .studio-card summary strong { display: block; color: var(--green-950); }
@@ -172,8 +188,9 @@
             .studio-actions { justify-content: flex-start; margin-top: 12px; }
             .section-quick-edit { grid-template-columns: 1fr; }
             .section-quick-edit textarea { grid-column: auto; }
-            .site-card-feature, .site-card-media, .site-card-feature.image-right, .site-card-media.image-right { grid-template-columns: 1fr; }
-            .site-card-feature.image-right img, .site-card-media.image-right img { order: 0; }
+            .site-card-feature, .site-card-media, .site-card-hero, .site-card-feature.image-right, .site-card-media.image-right, .site-card-hero.image-right { grid-template-columns: 1fr; }
+            .site-card-feature.image-right img, .site-card-media.image-right img, .site-card-hero.image-left img { order: 0; }
+            .site-card-cta { display: grid; }
         }
     </style>
 </head>

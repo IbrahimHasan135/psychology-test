@@ -92,13 +92,25 @@
 
                         <div class="card-stack">
                             @foreach ($section->cards as $card)
-                                <details class="studio-card" open>
-                                    <summary>
-                                        <span>
-                                            <strong>{{ $card->title }}</strong>
-                                            <small>{{ $templates[$card->template] ?? $card->template }} · {{ $card->is_active ? 'aktif' : 'nonaktif' }}</small>
-                                        </span>
-                                    </summary>
+                                <article class="visual-card-editor">
+                                    <div class="visual-card-head">
+                                        <div>
+                                            <span class="card-type">{{ $templates[$card->template] ?? $card->template }}</span>
+                                            <h4>{{ $card->title }}</h4>
+                                            <p>{{ $card->is_active ? 'Aktif' : 'Nonaktif' }} · urutan {{ $card->sort_order }}</p>
+                                        </div>
+                                        <form method="POST" action="{{ route('admin.cards.delete', $card) }}" onsubmit="return confirm('Hapus card ini?')">
+                                            @csrf
+                                            <button class="button danger-button" type="submit">Hapus</button>
+                                        </form>
+                                    </div>
+
+                                    <div class="card-live-preview">
+                                        @includeIf('website.card-templates.'.$card->template, ['card' => $card])
+                                    </div>
+
+                                    <details class="card-edit-panel">
+                                        <summary>Edit content</summary>
                                     <form method="POST" action="{{ route('admin.cards.update', $card) }}" class="card-editor-form">
                                         @csrf
                                         @method('PUT')
@@ -107,17 +119,13 @@
                                             <button class="button button-soft" type="submit">Update Card</button>
                                         </div>
                                     </form>
-                                    <form method="POST" action="{{ route('admin.cards.destroy', $card) }}" class="card-delete-form" onsubmit="return confirm('Hapus card ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="button danger-button" type="submit">Hapus Card</button>
-                                    </form>
-                                </details>
+                                    </details>
+                                </article>
                             @endforeach
                         </div>
 
-                        <details class="studio-card new-studio-card">
-                            <summary><strong>Tambah card baru</strong><small>Feature, media split, atau compact</small></summary>
+                        <details class="studio-card new-studio-card" open>
+                            <summary><strong>Tambah card baru</strong><small>Pilih jenis card lalu isi kontennya</small></summary>
                             <form method="POST" action="{{ route('admin.sections.cards.store', $section) }}" class="card-editor-form">
                                 @csrf
                                 @include('admin.pages.partials.card-fields', ['card' => null, 'templates' => $templates, 'imagePositions' => $imagePositions])
