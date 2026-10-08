@@ -104,13 +104,14 @@
                     <article class="permission-card">
                         <strong>{{ $addonName }}</strong>
                         @foreach ($roles as $role)
+                            @php($roleSlug = $role->slug)
                             <div class="permission-row">
-                                <span>{{ \App\Enums\UserRole::label($role) }}</span>
+                                <span>{{ $role->name }}</span>
                                 <small>
-                                    @if ($role === \App\Enums\UserRole::SUPER_ADMIN)
+                                    @if ($roleSlug === \App\Enums\UserRole::SUPER_ADMIN)
                                         All permissions
                                     @else
-                                        {{ $rolePermissions->get($role)?->pluck('permission')->intersect($permissions->pluck('permission'))->implode(', ') ?: 'No access' }}
+                                        {{ $rolePermissions->get($roleSlug)?->pluck('permission')->intersect($permissions->pluck('permission'))->implode(', ') ?: 'No access' }}
                                     @endif
                                 </small>
                             </div>

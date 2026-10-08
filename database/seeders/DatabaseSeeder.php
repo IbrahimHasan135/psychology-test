@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
@@ -55,10 +56,16 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($accounts as $account) {
-            User::query()->updateOrCreate(
-                ['username' => $account['username']],
-                $account
-            );
+            $user = User::query()->firstOrNew(['username' => $account['username']]);
+
+            $plainPassword = $account['password'];
+            unset($account['password']);
+
+            $user->fill($account);
+            if (! $user->exists || ! Hash::check($plainPassword, (string) $user->password)) {
+                $user->password = $plainPassword;
+            }
+            $user->save();
         }
 
         SitePage::query()->firstOrCreate(
@@ -75,33 +82,35 @@ class DatabaseSeeder extends Seeder
                 UserRole::ADMIN => ['demo.view'],
             ] as $role => $permissions) {
                 foreach ($permissions as $permission) {
-                    DB::table('role_addon_permissions')->updateOrInsert(
-                        [
-                            'role' => $role,
-                            'addon_slug' => str($permission)->before('.')->toString(),
-                            'permission' => $permission,
-                        ],
-                        [
+                    $attributes = [
+                        'role' => $role,
+                        'addon_slug' => str($permission)->before('.')->toString(),
+                        'permission' => $permission,
+                    ];
+
+                    if (! DB::table('role_addon_permissions')->where($attributes)->exists()) {
+                        DB::table('role_addon_permissions')->insert($attributes + [
                             'created_at' => now(),
                             'updated_at' => now(),
-                        ]
-                    );
+                        ]);
+                    }
                 }
             }
         }
 
         if (Schema::hasTable('role_creatable_roles')) {
             foreach ([UserRole::USER] as $creatableRole) {
-                DB::table('role_creatable_roles')->updateOrInsert(
-                    [
-                        'role_slug' => UserRole::ADMIN,
-                        'creatable_role_slug' => $creatableRole,
-                    ],
-                    [
+                $attributes = [
+                    'role_slug' => UserRole::ADMIN,
+                    'creatable_role_slug' => $creatableRole,
+                ];
+
+                if (! DB::table('role_creatable_roles')->where($attributes)->exists()) {
+                    DB::table('role_creatable_roles')->insert($attributes + [
                         'created_at' => now(),
                         'updated_at' => now(),
-                    ]
-                );
+                    ]);
+                }
             }
         }
     }

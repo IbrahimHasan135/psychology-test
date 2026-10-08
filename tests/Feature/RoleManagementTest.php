@@ -58,6 +58,11 @@ class RoleManagementTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::ADMIN]);
 
         $this->actingAs($admin)
+            ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee('User Management');
+
+        $this->actingAs($admin)
             ->post(route('admin.users.store'), [
                 'name' => 'Client User',
                 'username' => 'client.user',

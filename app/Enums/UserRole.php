@@ -11,6 +11,8 @@ final class UserRole
     public const ADMIN = 'admin';
     public const USER = 'user';
 
+    private static ?array $labels = null;
+
     public static function all(): array
     {
         return [
@@ -23,9 +25,10 @@ final class UserRole
     public static function label(string $role): string
     {
         if (class_exists(Role::class) && Schema::hasTable('roles')) {
-            $record = Role::query()->where('slug', $role)->first();
-            if ($record) {
-                return $record->name;
+            self::$labels ??= Role::query()->pluck('name', 'slug')->all();
+
+            if (isset(self::$labels[$role])) {
+                return self::$labels[$role];
             }
         }
 
