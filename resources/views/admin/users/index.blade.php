@@ -8,9 +8,39 @@
             <div>
                 <div class="eyebrow">Admin panel</div>
                 <h2>Akun & Role</h2>
-                <p>Base listing untuk pengelolaan akun. Form create/update bisa ditambahkan pada modul ini.</p>
+                <p>Base listing untuk pengelolaan akun dan visibility permission addon.</p>
             </div>
         </div>
+
+        <section class="admin-panel">
+            <div class="split compact-split">
+                <div>
+                    <h3>Addon Permissions</h3>
+                    <p>Super Admin otomatis punya semua akses. Admin/User mengikuti permission addon yang tercatat di database.</p>
+                </div>
+            </div>
+            <div class="permission-grid">
+                @forelse ($addonPermissions as $addonName => $permissions)
+                    <article class="permission-card">
+                        <strong>{{ $addonName }}</strong>
+                        @foreach ($roles as $role)
+                            <div class="permission-row">
+                                <span>{{ \App\Enums\UserRole::label($role) }}</span>
+                                <small>
+                                    @if ($role === \App\Enums\UserRole::SUPER_ADMIN)
+                                        All permissions
+                                    @else
+                                        {{ $rolePermissions->get($role)?->pluck('permission')->intersect($permissions->pluck('permission'))->implode(', ') ?: 'No access' }}
+                                    @endif
+                                </small>
+                            </div>
+                        @endforeach
+                    </article>
+                @empty
+                    <div class="empty-state">Belum ada addon permission.</div>
+                @endforelse
+            </div>
+        </section>
 
         <div class="table-wrap">
             <table>

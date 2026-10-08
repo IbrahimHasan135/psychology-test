@@ -51,13 +51,28 @@ DB_AUTO_MIGRATE=false
 Lalu jalankan migration manual dari terminal atau import SQL.
 ## Akun Default
 
-Semua akun default memakai password `password`.
-
 | Role | Login | Password |
 | --- | --- | --- |
-| Super Admin | `novalynk.superadmin` | `N0v4.lynk.` |
+| Super Admin | `novalynk.superadmin` | `N0v4.lynk` |
 | Admin | `admin` | `password` |
 | User | `user` | `password` |
+
+Seeder akan memperbarui akun default jika sudah ada, jadi perubahan password Super Admin ikut diterapkan saat `DB_AUTO_SEED=true` atau saat menjalankan `php artisan db:seed`.
+
+## Addon System
+
+NovaBase sudah punya fondasi addon seperti konsep NovaStore, tetapi memakai pola Laravel.
+
+- Daftar addon aktif ada di `config/addons.php`.
+- Setiap addon punya manifest `addons/NamaAddon/addon.php`.
+- Route addon ada di `addons/NamaAddon/routes/web.php`.
+- Class addon memakai namespace `Addons\NamaAddon\...` dan file-nya berada di `addons/NamaAddon/app`.
+- View addon otomatis bisa dipanggil dengan namespace slug, contoh `view('demo::index')`.
+- Migration addon otomatis dibaca dari `addons/NamaAddon/database/migrations`.
+- Sidebar admin dan dashboard membaca menu/card dari manifest addon.
+- Role mempengaruhi akses addon lewat tabel `role_addon_permissions`.
+
+Contoh aktif saat ini ada di `addons/Demo`.
 
 ## Deploy Tanpa Composer di Hosting
 
@@ -82,6 +97,7 @@ Admin panel punya menu `Page Management` untuk mengatur Home page. Mode tampilan
 - Admin panel: `Admin/*Controller`, `resources/views/admin`.
 - User area: `User/*Controller`, `resources/views/user`.
 - Role: `app/Enums/UserRole.php` dan `app/Http/Middleware/EnsureUserHasRole.php`.
+- Addon registry: `app/Core/Addons`, `config/addons.php`, dan `addons/*`.
 - Tabel otomatis: tambah migration di `database/migrations`, lalu jalankan `artisan migrate`.
 
 Catatan arsitektur lebih lengkap ada di `docs/ARCHITECTURE.md`.

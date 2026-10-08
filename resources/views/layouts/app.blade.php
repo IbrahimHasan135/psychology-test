@@ -91,7 +91,14 @@
         .sidebar { border-right: 1px solid var(--line); background: #ffffff; padding: 24px; }
         .sidebar a { display: block; padding: 11px 12px; border-radius: 8px; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
         .sidebar a.active, .sidebar a:hover { background: var(--mint); color: var(--green-900); }
+        .sidebar-group-label { margin: 18px 0 8px; color: var(--green-700); font-size: 12px; font-weight: 900; text-transform: uppercase; }
+        .sidebar-addon { margin-bottom: 8px; }
+        .sidebar-addon summary { cursor: pointer; color: var(--green-950); font-weight: 900; padding: 9px 12px; border-radius: 8px; background: #f7fbf8; }
+        .sidebar-addon a { margin: 6px 0 0 12px; font-size: 14px; }
         .content { padding: clamp(22px, 4vw, 42px); min-width: 0; }
+        .admin-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 8px; background: white; box-shadow: 0 12px 34px rgba(5, 46, 36, .05); }
+        .admin-topbar p { margin: 4px 0 0; }
+        .topbar-account { display: flex; align-items: center; gap: 10px; color: var(--green-950); }
         .table-wrap { overflow-x: auto; background: white; border: 1px solid var(--line); border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; min-width: 720px; }
         th, td { text-align: left; padding: 15px 18px; border-bottom: 1px solid var(--line); font-size: 14px; }
@@ -104,6 +111,11 @@
         .full-button { width: 100%; }
         .notice { margin-bottom: 18px; padding: 12px 14px; border: 1px solid #bfeccb; border-radius: 8px; background: #effbf2; color: var(--green-900); font-weight: 700; }
         .admin-panel { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 22px; margin-bottom: 20px; box-shadow: 0 16px 40px rgba(5, 46, 36, .05); }
+        .permission-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+        .permission-card { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fbfefc; }
+        .permission-row { display: flex; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); }
+        .permission-row:first-of-type { margin-top: 10px; }
+        .permission-row small { color: var(--muted); text-align: right; }
         .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: end; }
         .form-wide { grid-column: 1 / -1; }
         .form-actions { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
@@ -178,6 +190,11 @@
         .card-delete-form { display: flex; justify-content: flex-end; padding: 0 16px 16px; }
         .new-studio-card { margin: 18px 20px 20px; border-style: dashed; background: #fbfefc; }
         .new-studio-card summary { background: #effbf2; }
+        .addon-dashboard-section { margin-top: 34px; }
+        .addon-dashboard-card .card-kicker { color: var(--green-700); font-size: 12px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
+        .addon-card-content { display: grid; gap: 12px; }
+        .addon-card-content p { margin-bottom: 0; }
+        .addon-empty-state { margin-top: 24px; }
         @media (max-width: 860px) {
             .hero { grid-template-columns: 1fr; padding-top: 38px; }
             .grid-3 { grid-template-columns: 1fr; }
@@ -185,6 +202,7 @@
             .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
             .topbar { height: auto; min-height: 72px; padding-top: 14px; padding-bottom: 14px; align-items: flex-start; }
             .form-grid { grid-template-columns: 1fr; }
+            .permission-grid { grid-template-columns: 1fr; }
             .studio-board { grid-template-columns: 1fr; }
             .studio-settings { position: static; }
             .studio-topbar { display: block; }
@@ -194,6 +212,8 @@
             .site-card-feature, .site-card-media, .site-card-hero, .site-card-feature.image-right, .site-card-media.image-right, .site-card-hero.image-right { grid-template-columns: 1fr; }
             .site-card-feature.image-right img, .site-card-media.image-right img, .site-card-hero.image-left img { order: 0; }
             .site-card-cta { display: grid; }
+            .admin-topbar { display: grid; }
+            .topbar-account { align-items: flex-start; flex-direction: column; }
         }
     </style>
 </head>

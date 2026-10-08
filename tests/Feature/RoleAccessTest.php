@@ -47,7 +47,7 @@ class RoleAccessTest extends TestCase
 
         $response = $this->post(route('login.store'), [
             'login' => 'novalynk.superadmin',
-            'password' => 'N0v4.lynk.',
+            'password' => 'N0v4.lynk',
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
