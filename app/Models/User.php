@@ -57,6 +57,50 @@ class User extends Authenticatable
         return in_array($this->role, $roles, true);
     }
 
+    public function roleRecord(): ?Role
+    {
+        if (! Schema::hasTable('roles')) {
+            return null;
+        }
+
+        return Role::query()->where('slug', $this->role)->first();
+    }
+
+    public function isAdminLike(): bool
+    {
+        if ($this->role === UserRole::SUPER_ADMIN) {
+            return true;
+        }
+
+        return (bool) $this->roleRecord()?->is_admin;
+    }
+
+    public function canManageUsers(): bool
+    {
+        return $this->isAdminLike();
+    }
+
+    public function canManageRoles(): bool
+    {
+        return $this->role === UserRole::SUPER_ADMIN;
+    }
+
+    public function canCreateRole(string $roleSlug): bool
+    {
+        if ($this->role === UserRole::SUPER_ADMIN) {
+            return true;
+        }
+
+        if (! Schema::hasTable('role_creatable_roles')) {
+            return false;
+        }
+
+        return DB::table('role_creatable_roles')
+            ->where('role_slug', $this->role)
+            ->where('creatable_role_slug', $roleSlug)
+            ->exists();
+    }
+
     public function hasPermission(string $permission): bool
     {
         if ($this->role === UserRole::SUPER_ADMIN) {
@@ -91,6 +135,6 @@ class User extends Authenticatable
 
     public function dashboardRoute(): string
     {
-        return $this->hasRole('super_admin', 'admin') ? 'admin.dashboard' : 'user.dashboard';
+        return $this->isAdminLike() ? 'admin.dashboard' : 'user.dashboard';
     }
 }

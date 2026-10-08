@@ -159,6 +159,19 @@
         .full-button { width: 100%; }
         .notice { margin-bottom: 18px; padding: 12px 14px; border: 1px solid #bfeccb; border-radius: 8px; background: #effbf2; color: var(--green-900); font-weight: 700; }
         .admin-panel { background: var(--nv-card-bg); border: 1px solid rgba(8,114,79,.14); border-radius: var(--nv-card-radius); padding: 22px; margin: 22px 28px; box-shadow: var(--nv-shadow); }
+        .admin-status { margin: 18px 28px 0; }
+        .admin-grid { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 18px; align-items: start; margin: 22px 28px; }
+        .admin-card { background: var(--nv-card-bg); border: 1px solid rgba(8,114,79,.14); border-radius: var(--nv-card-radius); padding: 22px; box-shadow: var(--nv-shadow); }
+        .admin-card h2 { margin-bottom: 16px; }
+        .admin-card h3 { margin: 18px 0 10px; }
+        .wide-card { min-width: 0; }
+        .role-edit-card { margin: 22px 28px; max-width: 820px; display: grid; gap: 12px; }
+        .embedded-table { border-radius: 14px; box-shadow: none; }
+        .inline-form { display: inline-flex; margin-left: 6px; }
+        .check-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 8px; }
+        .check-grid label { display: flex; align-items: center; gap: 8px; margin: 0; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: #f7fbf8; color: var(--ink); font-size: 13px; text-transform: none; }
+        .check-grid input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green-700); }
+        .compact-permission-card { margin: 10px 0; }
         .permission-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
         .permission-card { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fbfefc; }
         .permission-row { display: flex; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); }
@@ -177,6 +190,13 @@
         .empty-state { padding: 28px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); background: white; }
         .website-page { min-height: calc(100vh - 72px); background: #f8fcf9; }
         .blank-home { min-height: calc(100vh - 72px); display: grid; place-items: center; }
+        .landing-hero { min-height: calc(100vh - 72px); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: clamp(28px, 6vw, 80px); align-items: center; padding: clamp(46px, 8vw, 92px) 0; }
+        .landing-hero h1 { margin-bottom: 18px; }
+        .landing-hero p { max-width: 660px; font-size: 18px; }
+        .landing-panel { min-height: 300px; display: grid; align-content: end; gap: 10px; padding: 28px; border-radius: 24px; border: 1px solid rgba(8,114,79,.16); background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(237,249,241,.8)), linear-gradient(90deg, rgba(8,114,79,.08) 1px, transparent 1px), linear-gradient(180deg, rgba(22,160,93,.07) 1px, transparent 1px); background-size: auto, 28px 28px, 28px 28px; box-shadow: 0 34px 80px rgba(5, 46, 36, .16); }
+        .landing-panel span { color: var(--green-700); font-size: 12px; font-weight: 900; text-transform: uppercase; }
+        .landing-panel strong { color: var(--green-950); font-size: 28px; line-height: 1.1; }
+        .landing-panel p { font-size: 14px; margin: 0; }
         .website-tabs { position: sticky; top: 72px; z-index: 10; display: flex; gap: 10px; flex-wrap: wrap; padding: 14px 0; background: rgba(248, 252, 249, .92); backdrop-filter: blur(12px); }
         .website-tabs a { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; background: white; color: var(--green-900); font-weight: 800; }
         .website-section { padding: 56px 0; scroll-margin-top: 110px; }
@@ -245,6 +265,7 @@
         .addon-empty-state { margin-top: 24px; }
         @media (max-width: 860px) {
             .hero { grid-template-columns: 1fr; padding-top: 38px; }
+            .landing-hero { grid-template-columns: 1fr; }
             .grid-3 { grid-template-columns: 1fr; }
             .sidebar { transform: translateX(-100%); }
             .sidebar-toggle { display: flex; }
@@ -253,6 +274,8 @@
             .topbar { height: auto; min-height: 72px; padding-top: 14px; padding-bottom: 14px; align-items: flex-start; }
             .form-grid { grid-template-columns: 1fr; }
             .permission-grid { grid-template-columns: 1fr; }
+            .admin-grid { grid-template-columns: 1fr; margin-left: 16px; margin-right: 16px; }
+            .role-edit-card { margin-left: 16px; margin-right: 16px; }
             .studio-board { grid-template-columns: 1fr; }
             .studio-settings { position: static; }
             .studio-topbar { display: block; }
@@ -279,7 +302,7 @@
         </a>
         <nav class="nav">
             @auth
-                <a href="{{ route(auth()->user()->dashboardRoute()) }}">Dashboard</a>
+                <a href="{{ route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit">Logout</button>

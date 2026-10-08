@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\UserRole;
 use App\Models\SitePage;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,6 +17,19 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        $roles = [
+            ['name' => 'Super Admin', 'slug' => UserRole::SUPER_ADMIN, 'is_system' => true, 'is_admin' => true],
+            ['name' => 'Admin', 'slug' => UserRole::ADMIN, 'is_system' => true, 'is_admin' => true],
+            ['name' => 'User', 'slug' => UserRole::USER, 'is_system' => true, 'is_admin' => false],
+        ];
+
+        foreach ($roles as $role) {
+            Role::query()->updateOrCreate(
+                ['slug' => $role['slug']],
+                $role
+            );
+        }
+
         $accounts = [
             [
                 'name' => 'Novalynk Super Admin',
@@ -73,6 +87,21 @@ class DatabaseSeeder extends Seeder
                         ]
                     );
                 }
+            }
+        }
+
+        if (Schema::hasTable('role_creatable_roles')) {
+            foreach ([UserRole::USER] as $creatableRole) {
+                DB::table('role_creatable_roles')->updateOrInsert(
+                    [
+                        'role_slug' => UserRole::ADMIN,
+                        'creatable_role_slug' => $creatableRole,
+                    ],
+                    [
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
             }
         }
     }

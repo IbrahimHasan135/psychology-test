@@ -29,12 +29,24 @@
             </section>
         @endforeach
     @else
-        <section class="blank-home page">
-            @auth
-                <a class="button button-soft" href="{{ route(auth()->user()->dashboardRoute()) }}">Dashboard</a>
-            @else
-                <a class="button button-primary" href="{{ route('login') }}">Login</a>
-            @endauth
+        <section class="landing-hero page">
+            <div>
+                <div class="eyebrow">Novalynk Modular Base</div>
+                <h1>NovaBase</h1>
+                <p>A green Laravel foundation for modular products, admin panels, landing pages, addon features, roles, and future client deployments.</p>
+                <div class="hero-actions">
+                    @auth
+                        <a class="button button-primary" href="{{ route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
+                    @else
+                        <a class="button button-primary" href="{{ route('login') }}">Admin Panel</a>
+                    @endauth
+                </div>
+            </div>
+            <div class="landing-panel">
+                <span>Core</span>
+                <strong>Auth, roles, pages, addons</strong>
+                <p>Start with a clean base, then mount product features from the addon folder.</p>
+            </div>
         </section>
     @endif
 </main>

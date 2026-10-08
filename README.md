@@ -77,6 +77,14 @@ NovaBase includes a Laravel-native addon foundation inspired by NovaStore.
 
 The current working example is `addons/Demo`.
 
+## Role And User Management
+
+- `Role Management` is available only to Super Admin.
+- Super Admin can create roles, mark a role as admin-panel capable, assign addon permissions, and choose which account roles that role can create.
+- `User Management` is available to admin-panel roles.
+- Admin users can create accounts only with roles allowed by Super Admin.
+- Super Admin can manage all accounts and all roles.
+
 ## Deploy Without Composer On Hosting
 
 The `vendor/` folder is intentionally committed so cloned/uploaded hosting copies can find Laravel dependencies immediately. The `.env` file is still not committed, so copy it from `.env.example` and adjust hosting database credentials.
@@ -99,7 +107,7 @@ The admin panel includes `Page Management` for managing the Home page. Display m
 - Login/logout: `Auth/LoginController`, `resources/views/auth`.
 - Admin panel: `Admin/*Controller`, `resources/views/admin`.
 - User area: `User/*Controller`, `resources/views/user`.
-- Roles: `app/Enums/UserRole.php` and `app/Http/Middleware/EnsureUserHasRole.php`.
+- Roles: `app/Models/Role.php`, `app/Enums/UserRole.php`, and admin role/user controllers.
 - Addon registry: `app/Core/Addons`, `config/addons.php`, and `addons/*`.
 - Automatic tables: add migrations to `database/migrations` or addon migration folders, then run `artisan migrate`.
 

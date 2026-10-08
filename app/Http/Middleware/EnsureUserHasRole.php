@@ -12,7 +12,12 @@ class EnsureUserHasRole
     {
         $user = $request->user();
 
-        abort_if($user === null || ! $user->hasRole(...$roles), 403);
+        $allowed = $user !== null && (
+            $user->hasRole(...$roles)
+            || (in_array('admin', $roles, true) && $user->isAdminLike())
+        );
+
+        abort_if(! $allowed, 403);
 
         return $next($request);
     }

@@ -9,6 +9,7 @@ NovaBase memakai Laravel MVC standar supaya setiap produk Novalynk bisa dimulai 
 - `app/Http/Middleware`: penjaga akses sebelum controller. Saat ini ada `EnsureUserHasRole` untuk Super Admin, Admin, dan User.
 - `app/Models`: representasi tabel database. `User` sudah punya helper role dan redirect dashboard.
 - `app/Enums`: kontrak nilai tetap seperti role akun agar string tidak tercecer di banyak file.
+- `app/Models/Role.php`: role dinamis untuk admin panel, addon permission, dan aturan role apa saja yang boleh dibuat oleh role tertentu.
 - `app/Core/Addons`: registry dan metadata addon. Core membaca manifest addon dari `config/addons.php`.
 - `database/migrations`: definisi tabel. Untuk bikin tabel otomatis, buat migration baru lalu jalankan `php artisan migrate`.
 - `database/seeders`: data awal untuk local/dev, termasuk akun default.
@@ -20,6 +21,8 @@ NovaBase memakai Laravel MVC standar supaya setiap produk Novalynk bisa dimulai 
 - `super_admin`: akses admin panel penuh.
 - `admin`: akses admin panel operasional.
 - `user`: akses dashboard user.
+
+`Role Management` hanya untuk Super Admin. `User Management` dapat dibuka oleh role admin panel, tetapi role yang bisa dibuat mengikuti tabel `role_creatable_roles`.
 
 ## Pola Menambah Fitur
 

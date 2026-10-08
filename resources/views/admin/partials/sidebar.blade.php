@@ -21,7 +21,13 @@
     <nav class="sidebar-nav" id="sidebarNav">
             <div class="sidebar-group-label">Admin Panel</div>
             <a class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}"><span>Dashboard</span></a>
-            <a class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}"><span>Accounts & Roles</span></a>
+            <a href="{{ route('home') }}"><span>Back To Website</span></a>
+            @if (auth()->user()?->canManageRoles())
+                <a class="{{ request()->routeIs('admin.roles.*') ? 'active' : '' }}" href="{{ route('admin.roles.index') }}"><span>Role Management</span></a>
+            @endif
+            @if (auth()->user()?->canManageUsers())
+                <a class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}"><span>User Management</span></a>
+            @endif
             <a class="{{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.sections.*') || request()->routeIs('admin.cards.*') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}"><span>Page Management</span></a>
 
             @if ($addonMenu->isNotEmpty())
