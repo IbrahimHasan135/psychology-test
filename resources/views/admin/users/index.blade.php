@@ -18,9 +18,15 @@
         @endif
 
         <section class="admin-grid">
-            <form class="admin-card" method="POST" action="{{ route('admin.users.store') }}">
+            <form class="admin-card form-card" method="POST" action="{{ route('admin.users.store') }}">
                 @csrf
-                <h2>Create Account</h2>
+                <div class="admin-card-header">
+                    <div>
+                        <span class="card-kicker">Account directory</span>
+                        <h2>Create Account</h2>
+                        <p>Add a user and assign one of the roles available to you.</p>
+                    </div>
+                </div>
 
                 <label for="name">Full Name</label>
                 <input id="name" name="name" required value="{{ old('name') }}" placeholder="Example: John Doe">
@@ -46,9 +52,16 @@
             </form>
 
             <div class="admin-card wide-card">
-                <h2>Accounts</h2>
+                <div class="admin-card-header">
+                    <div>
+                        <span class="card-kicker">Directory</span>
+                        <h2>Accounts</h2>
+                        <p>Manage account identity and access assignments.</p>
+                    </div>
+                    <span class="pill">{{ $users->total() }} accounts</span>
+                </div>
                 <div class="table-wrap embedded-table">
-                    <table>
+                    <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -62,20 +75,22 @@
                         <tbody>
                             @forelse ($users as $user)
                                 <tr>
-                                    <td>{{ $user->name }}</td>
-                                    <td>{{ $user->username ?? '-' }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td><span class="pill">{{ \App\Enums\UserRole::label($user->role) }}</span></td>
-                                    <td>{{ $user->created_at?->format('d M Y H:i') }}</td>
-                                    <td>
-                                        <a class="button button-soft" href="{{ route('admin.users.edit', $user) }}">Edit</a>
+                                    <td data-label="Name">{{ $user->name }}</td>
+                                    <td data-label="Username">{{ $user->username ?? '-' }}</td>
+                                    <td data-label="Email">{{ $user->email }}</td>
+                                    <td data-label="Role"><span class="pill">{{ \App\Enums\UserRole::label($user->role) }}</span></td>
+                                    <td data-label="Created">{{ $user->created_at?->format('d M Y H:i') }}</td>
+                                    <td data-label="Actions">
+                                        <div class="action-group">
+                                        <a class="button button-soft button-sm" href="{{ route('admin.users.edit', $user) }}">Edit</a>
                                         @if (auth()->id() !== $user->id)
                                             <form class="inline-form" method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Delete this account?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="button danger-button" type="submit">Delete</button>
+                                                <button class="button danger-button button-sm" type="submit">Delete</button>
                                             </form>
                                         @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -92,7 +107,7 @@
             </div>
         </section>
 
-        <section class="admin-panel">
+        <section class="admin-panel permission-overview">
             <div class="split compact-split">
                 <div>
                     <h3>Addon Permissions</h3>

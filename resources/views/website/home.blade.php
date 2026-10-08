@@ -2,7 +2,38 @@
 
 @section('content')
 <main class="website-page">
-    @if ($page && $page->activeSections->isNotEmpty())
+    @if (!empty($builderState))
+        @php($novabaseAuth = auth()->check() ? [
+            'authenticated' => true,
+            'label' => auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal',
+            'url' => route(auth()->user()->dashboardRoute()),
+        ] : [
+            'authenticated' => false,
+            'label' => 'Login',
+            'url' => route('login'),
+        ])
+        <div id="publicSiteCanvas"></div>
+        <script>
+            window.NOVABASE_BUILDER_STATE = @json($builderState, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+            window.NOVABASE_DESIGN_TEMPLATES = @json($designTemplates, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+            window.NOVABASE_BASE_URL = @json(url('/'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+            window.NOVABASE_AUTH = @json($novabaseAuth, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+        </script>
+        <script type="module" src="{{ asset('js/page-builder/editor/public-renderer.js') }}"></script>
+    @elseif ($page && $page->blocks->isNotEmpty())
+        @if ($page->blocks->contains('nav_enabled', true))
+            <nav class="{{ $page->display_mode === 'tabs' ? 'website-tabs' : 'nb-section-nav' }} page" aria-label="Website sections">
+                @foreach ($page->blocks->where('nav_enabled', true) as $block)
+                    <a href="#{{ $block->block_uid }}">{{ $block->nav_label ?: ($block->data_json['title'] ?? 'Section') }}</a>
+                @endforeach
+            </nav>
+        @endif
+        @foreach ($page->blocks as $block)
+            <section class="nb-block nb-block-{{ $block->type }}" id="{{ $block->block_uid }}">
+                @includeIf('website.blocks.'.$block->type, ['data' => $block->data_json])
+            </section>
+        @endforeach
+    @elseif ($page && ! $page->builder_initialized && $page->activeSections->isNotEmpty())
         @if ($page->display_mode === 'tabs')
             <nav class="website-tabs page" aria-label="Website tabs">
                 @foreach ($page->activeSections as $section)
@@ -38,7 +69,7 @@
                     @auth
                         <a class="button button-primary" href="{{ route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
                     @else
-                        <a class="button button-primary" href="{{ route('login') }}">Admin Panel</a>
+                        <a class="button button-primary" href="{{ route('login') }}">Login</a>
                     @endauth
                 </div>
             </div>

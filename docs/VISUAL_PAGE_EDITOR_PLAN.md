@@ -594,16 +594,43 @@ resources/js/page-builder/*
 resources/views/layouts/app.blade.php
 ```
 
-## Open Decisions Before Implementation
+## Decisions For The First Version
 
-1. Should the editor autosave or require a Save button?
-2. Should public pages support multiple pages/routes immediately, or only Home first?
-3. Should uploaded images be implemented now or start with image URLs?
-4. Should old `site_sections/site_cards` be migrated into blocks automatically?
-5. Should addons be allowed to register custom page-builder blocks in this phase?
+1. The editor autosaves the complete builder state to Laravel after a short debounce; Save changes also triggers an immediate save.
+2. Pages/tabs are stored as separate `site_pages` records and resolve to public slug routes.
+3. URL fields and the POC's image-to-Base64 upload interaction are supported; a media library is deferred.
+4. Existing sections/cards are imported into blocks on the first editor visit, with legacy tables retained as a fallback.
+5. Built-in types use the central registry. Addon-owned custom block registration is deferred until its PHP, preview JavaScript, Blade view, and permission contract can be versioned together.
 
 ## Recommendation
 
 Implement the block-based editor in phases. Start with Home page visual editing using `site_blocks`, keep old tables as fallback, and reuse the POC editor architecture with Laravel persistence.
 
 This keeps NovaBase modular and future-proof: the admin editor becomes a true visual builder, while the public website renders the exact same block data without editor controls.
+
+## Implementation Update - 2026-10-08
+
+The editor now follows the POC's actual HTML, JavaScript renderer, and CSS theme system. The existing `site_sections` and `site_cards` tables remain in place; the editor uses additive block storage and public pages call the same JavaScript `renderPublicPage` renderer as the editor canvas.
+
+### Implemented
+
+- The adapted editor modules are under `public/js/page-builder/editor/`; the POC's `editor.css` and `templates.css` are under `public/css/page-builder/`. Laravel `BlockRegistry` supplies the same block defaults, image examples, and five theme definitions to the client.
+- `site_blocks` stores ordered JSON blocks. `site_pages.builder_initialized` prevents repeated legacy imports, and `site_pages.template_id` stores the selected site theme.
+- Page Management now renders the builder directly. The left rail includes page tabs, all five template swatches, and the nine POC block types. The canvas uses the POC renderer, inline text editing, block toolbar, mobile/desktop switch, and the POC inspector controls.
+- The complete POC page state (`template`, `pages`, page paths, and blocks) autosaves to `PUT /admin/pages/builder-state`; database writes run in a transaction and return canonical IDs for newly added pages.
+- Public page paths use each page slug. The public view invokes the same `siteRenderer.js` module with edit controls disabled, and prefixes paths with Laravel's base URL so subfolder deployments continue to work.
+- Image uploads preserve the POC interaction: selected files are encoded as data URLs and saved inside block JSON. External URL fields remain available.
+- Existing sections are imported as Card Grid blocks. Old section/card tables remain for rollback and compatibility.
+- All copied assets are served from `public/`; no Vite build is required for this editor.
+
+### Findings And Boundaries
+
+- Page creation follows the POC prompt flow; page deletion and page-level draft/publish controls are not in the POC and remain outside this implementation.
+- Legacy content is preserved in its original tables, but its visual card templates do not map one-to-one to POC block types. Review a converted legacy page before publishing if it relied on old card-specific layouts.
+- Base64 image uploads are stored in page JSON like the POC state. Large uploads are limited by PHP request size and can make the JSON column grow; a storage-backed media library remains a follow-up.
+- The five templates and nine block types are centrally validated. Addon-defined block registration still needs an explicit server/client contract before addon packages can add their own block types.
+- The existing section/card endpoints remain for compatibility. Writes through those endpoints after conversion do not update `site_blocks`.
+
+### Verification Boundary
+
+PHP syntax checks for changed backend files, `node --check` across the POC modules, Blade view caching, Laravel route listing, CSS comparison for the template theme sheet, and `git diff --check` passed. Feature tests and browser interaction checks were not run for this revised POC-based implementation.

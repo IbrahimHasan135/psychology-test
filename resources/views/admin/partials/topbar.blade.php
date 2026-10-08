@@ -3,6 +3,10 @@
     <div class="topbar-search">
         <input class="topbar-search-input" type="text" placeholder="Search workspace...">
     </div>
+    <a class="admin-web-link" href="{{ route('home') }}">
+        <span aria-hidden="true">↗</span>
+        <span>View Website</span>
+    </a>
     <div class="topbar-right">
         <span>Hello, <strong>{{ auth()->user()->name }}</strong></span>
         <button class="topbar-avatar" type="button" title="{{ \App\Enums\UserRole::label(auth()->user()->role) }}">

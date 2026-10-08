@@ -15,12 +15,15 @@ class SitePage extends Model
         'slug',
         'display_mode',
         'is_published',
+        'builder_initialized',
+        'template_id',
     ];
 
     protected function casts(): array
     {
         return [
             'is_published' => 'boolean',
+            'builder_initialized' => 'boolean',
         ];
     }
 
@@ -32,5 +35,10 @@ class SitePage extends Model
     public function activeSections(): HasMany
     {
         return $this->sections()->where('is_active', true);
+    }
+
+    public function blocks(): HasMany
+    {
+        return $this->hasMany(SiteBlock::class, 'site_page_id')->orderBy('sort_order')->orderBy('id');
     }
 }

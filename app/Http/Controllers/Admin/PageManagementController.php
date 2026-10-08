@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\SiteCard;
 use App\Models\SitePage;
 use App\Models\SiteSection;
+use App\Core\PageBuilder\BlockRegistry;
+use App\Core\PageBuilder\PageBuilderService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,20 +16,156 @@ use Illuminate\View\View;
 
 class PageManagementController extends Controller
 {
-    public function index(): View
+    public function index(PageBuilderService $builder): View
     {
-        return view('admin.pages.index', [
-            'pages' => SitePage::query()->withCount('sections')->orderBy('name')->get(),
+        $page = SitePage::query()->where('slug', 'home')->firstOrFail();
+
+        return $this->editorView($page, $builder);
+    }
+
+    public function edit(SitePage $page, PageBuilderService $builder): View
+    {
+        return $this->editorView($page, $builder);
+    }
+
+    private function editorView(SitePage $page, PageBuilderService $builder): View
+    {
+        return view('admin.pages.editor', [
+            'page' => $page,
+            'builderState' => $builder->editorState($page),
+            'blockDefinitions' => BlockRegistry::definitions(),
+            'designTemplates' => BlockRegistry::templates(),
         ]);
     }
 
-    public function edit(SitePage $page): View
+    public function saveSiteBuilder(Request $request, PageBuilderService $builder): JsonResponse
     {
-        return view('admin.pages.edit', [
-            'page' => $page->load(['sections.cards']),
-            'templates' => SiteCard::TEMPLATES,
-            'imagePositions' => SiteCard::IMAGE_POSITIONS,
+        $validated = $request->validate([
+            'template' => ['required', Rule::in(array_keys(BlockRegistry::templates()))],
+            'activePageId' => ['required', 'string', 'max:80'],
+            'pages' => ['required', 'array', 'min:1', 'max:30'],
+            'pages.*.id' => ['required', 'string', 'alpha_dash', 'max:80'],
+            'pages.*.label' => ['required', 'string', 'max:120'],
+            'pages.*.path' => ['required', 'string', 'max:121', 'regex:/^\/(?:[A-Za-z0-9][A-Za-z0-9-]*)?$/', 'distinct'],
+            'pages.*.blocks' => ['present', 'array', 'max:100'],
+            'pages.*.blocks.*.id' => ['required', 'string', 'alpha_dash', 'max:80', 'distinct'],
+            'pages.*.blocks.*.type' => ['required', Rule::in(array_keys(BlockRegistry::definitions()))],
+            'pages.*.blocks.*.navEnabled' => ['required', 'boolean'],
+            'pages.*.blocks.*.navLabel' => ['nullable', 'string', 'max:120'],
+            'pages.*.blocks.*.data' => ['required', 'array'],
         ]);
+
+        foreach ($validated['pages'] as $pageState) {
+            foreach ($pageState['blocks'] as $block) {
+                $this->validateBlockData($block['type'], $block['data']);
+            }
+        }
+
+        return response()->json([
+            'saved' => true,
+            'state' => $builder->saveSiteState($validated),
+            'savedAt' => now()->toIso8601String(),
+        ]);
+    }
+
+    public function saveBuilder(Request $request, SitePage $page, PageBuilderService $builder): JsonResponse
+    {
+        $validated = $request->validate([
+            'page.name' => ['required', 'string', 'max:255'],
+            'page.displayMode' => ['required', Rule::in(['sections', 'tabs'])],
+            'page.published' => ['required', 'boolean'],
+            'blocks' => ['present', 'array', 'max:100'],
+            'blocks.*.id' => ['required', 'string', 'max:80', 'distinct'],
+            'blocks.*.type' => ['required', Rule::in(array_keys(BlockRegistry::definitions()))],
+            'blocks.*.navEnabled' => ['required', 'boolean'],
+            'blocks.*.navLabel' => ['nullable', 'string', 'max:120'],
+            'blocks.*.data' => ['required', 'array'],
+        ]);
+
+        foreach ($validated['blocks'] as $block) {
+            $this->validateBlockData($block['type'], $block['data']);
+        }
+
+        $builder->save($page, $validated);
+
+        return response()->json(['saved' => true, 'savedAt' => now()->toIso8601String()]);
+    }
+
+    private function validateBlockData(string $type, array $data): void
+    {
+        $defaults = BlockRegistry::defaults($type);
+        $rules = [];
+        foreach ($defaults as $key => $default) {
+            $maxLength = preg_match('/image/i', $key) ? 5_500_000 : 5000;
+            $rules[$key] = is_array($default) ? ['nullable', 'array', 'max:100'] : ['nullable', 'string', 'max:'.$maxLength];
+        }
+        validator($data, $rules)->validate();
+
+        foreach ($data as $key => $value) {
+            if (! array_key_exists($key, $defaults)) {
+                abort(422, 'Unknown field for page block.');
+            }
+            if (! is_array($defaults[$key])) {
+                $this->validateSafeUrl($key, $value);
+                continue;
+            }
+            if ($value === null) {
+                continue;
+            }
+            foreach ($value as $item) {
+                if ($key === 'images') {
+                    validator(['value' => $item], ['value' => ['nullable', 'string', 'max:5500000']])->validate();
+                    $this->validateSafeUrl('image', $item);
+                    continue;
+                }
+                if (! is_array($item)) {
+                    abort(422, 'Invalid repeatable block item.');
+                }
+                foreach ($item as $itemKey => $itemValue) {
+                    if (! array_key_exists($itemKey, $defaults[$key][0] ?? [])) {
+                        abort(422, 'Unknown repeatable block field.');
+                    }
+                    $maxLength = preg_match('/image/i', $itemKey) ? 5_500_000 : 5000;
+                    validator(['value' => $itemValue], ['value' => ['nullable', 'string', 'max:'.$maxLength]])->validate();
+                    $this->validateSafeUrl($itemKey, $itemValue);
+                }
+            }
+        }
+    }
+
+    private function validateSafeUrl(string $field, mixed $value): void
+    {
+        if (is_string($value) && str_starts_with($value, 'data:image/')) {
+            if (preg_match('/image/i', $field) && preg_match('/^data:image\/(?:png|jpe?g|gif|webp);base64,[A-Za-z0-9+\/=]+$/', $value)) {
+                return;
+            }
+            abort(422, 'Only supported image data can be embedded.');
+        }
+        if ($value === null || $value === '' || ! preg_match('/url|image|link/i', $field)) {
+            return;
+        }
+        if ((str_starts_with($value, '/') && ! str_starts_with($value, '//')) || str_starts_with($value, '#')) {
+            if (preg_match('/^[A-Za-z0-9._~\/%?#=&+-]+$/', $value)) {
+                return;
+            }
+            abort(422, 'This relative URL contains unsupported characters.');
+        }
+        $isImage = preg_match('/image/i', $field) === 1;
+        if ($isImage && strpbrk($value, "'\"()\\\r\n") !== false) {
+            abort(422, 'This image URL contains unsupported characters.');
+        }
+        if (! $isImage && preg_match('/^[A-Za-z0-9._~\/%?#=&+-]+$/', $value)) {
+            return;
+        }
+        $scheme = parse_url($value, PHP_URL_SCHEME);
+        if ($scheme === null) abort(422, 'This URL must use a supported local or web address.');
+        $allowedSchemes = preg_match('/buttonUrl|link/i', $field) ? ['http', 'https', 'mailto', 'tel'] : ['http', 'https'];
+        if (! in_array(strtolower((string) $scheme), $allowedSchemes, true)) {
+            abort(422, 'This URL scheme is not allowed for this field.');
+        }
+        if (in_array(strtolower((string) $scheme), ['http', 'https'], true) && filter_var($value, FILTER_VALIDATE_URL) === false) {
+            abort(422, 'This web URL is invalid.');
+        }
     }
 
     public function update(Request $request, SitePage $page): RedirectResponse

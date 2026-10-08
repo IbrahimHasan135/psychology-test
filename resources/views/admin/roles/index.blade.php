@@ -18,9 +18,15 @@
         @endif
 
         <section class="admin-grid">
-            <form class="admin-card" method="POST" action="{{ route('admin.roles.store') }}">
+            <form class="admin-card form-card" method="POST" action="{{ route('admin.roles.store') }}">
                 @csrf
-                <h2>Create Role</h2>
+                <div class="admin-card-header">
+                    <div>
+                        <span class="card-kicker">Access control</span>
+                        <h2>Create Role</h2>
+                        <p>Define what this role can access and which accounts it can create.</p>
+                    </div>
+                </div>
                 <label for="role_name">Role Name</label>
                 <input id="role_name" name="name" required placeholder="Example: Sales Admin" value="{{ old('name') }}">
 
@@ -52,9 +58,16 @@
             </form>
 
             <div class="admin-card wide-card">
-                <h2>Roles</h2>
+                <div class="admin-card-header">
+                    <div>
+                        <span class="card-kicker">Directory</span>
+                        <h2>Roles</h2>
+                        <p>Review system roles and their current access rules.</p>
+                    </div>
+                    <span class="pill">{{ $roles->count() }} roles</span>
+                </div>
                 <div class="table-wrap embedded-table">
-                    <table>
+                    <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>Role</th>
@@ -68,23 +81,43 @@
                         <tbody>
                             @foreach ($roles as $role)
                                 <tr>
-                                    <td>
+                                    <td data-label="Role">
                                         <strong>{{ $role->name }}</strong>
                                         @if ($role->is_system)
                                             <span class="pill">system</span>
                                         @endif
                                     </td>
-                                    <td>{{ $role->slug }}</td>
-                                    <td>{{ $role->is_admin ? 'Admin panel' : 'User portal' }}</td>
-                                    <td>{{ $rolePermissions->get($role->slug)?->pluck('permission')->implode(', ') ?: 'No addon access' }}</td>
-                                    <td>{{ $creatableRoles->get($role->slug)?->pluck('creatable_role_slug')->implode(', ') ?: 'None' }}</td>
-                                    <td>
-                                        <a class="button button-soft" href="{{ route('admin.roles.edit', $role) }}">Edit</a>
+                                    <td data-label="Slug">{{ $role->slug }}</td>
+                                    <td data-label="Mode">{{ $role->is_admin ? 'Admin panel' : 'User portal' }}</td>
+                                    <td data-label="Addon permissions">
+                                        @php($permissions = $rolePermissions->get($role->slug)?->pluck('permission')->filter()->values())
+                                        @if ($permissions?->isNotEmpty())
+                                            <div class="summary-text">
+                                                @foreach ($permissions as $permission)<span class="summary-chip">{{ $permission }}</span>@endforeach
+                                            </div>
+                                        @else
+                                            <span class="summary-muted">No addon access</span>
+                                        @endif
+                                    </td>
+                                    <td data-label="Can create">
+                                        @php($creatable = $creatableRoles->get($role->slug)?->pluck('creatable_role_slug')->filter()->values())
+                                        @if ($creatable?->isNotEmpty())
+                                            <div class="summary-text">
+                                                @foreach ($creatable as $createdRole)<span class="summary-chip">{{ $createdRole }}</span>@endforeach
+                                            </div>
+                                        @else
+                                            <span class="summary-muted">None</span>
+                                        @endif
+                                    </td>
+                                    <td data-label="Actions">
+                                        <div class="action-group">
+                                        <a class="button button-soft button-sm" href="{{ route('admin.roles.edit', $role) }}">Edit</a>
                                         <form method="POST" action="{{ route('admin.roles.destroy', $role) }}" class="inline-form" onsubmit="return confirm('Delete this role?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="button danger-button" type="submit">Delete</button>
+                                            <button class="button danger-button button-sm" type="submit">Delete</button>
                                         </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

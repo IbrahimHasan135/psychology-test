@@ -1,0 +1,292 @@
+.website-theme {
+  --site-bg: #ffffff;
+  --site-surface: #ffffff;
+  --site-soft: #f8fafc;
+  --site-ink: #111827;
+  --site-muted: #64748b;
+  --site-accent: #2563eb;
+  --site-accent-2: #047857;
+  --site-border: #e5ebf0;
+  --site-hero: linear-gradient(135deg, #f7fbff 0%, #ffffff 48%, #edf7f1 100%);
+  --site-cta: #111827;
+  --site-cta-ink: #ffffff;
+  --site-cta-muted: #cbd5e1;
+  --site-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-heading-font: var(--site-font);
+  --site-radius: 8px;
+  background: var(--site-bg);
+  color: var(--site-ink);
+  font-family: var(--site-font);
+  min-height: 720px;
+}
+
+.website-theme .site-navbar,
+.website-theme .hero-section,
+.website-theme .section-pad {
+  background: var(--site-bg);
+}
+
+.website-theme .site-navbar {
+  border-bottom-color: var(--site-border);
+}
+
+.website-theme .site-logo,
+.website-theme .section-heading,
+.website-theme .hero-title,
+.website-theme .cta-band .h1,
+.website-theme .pricing-card h3,
+.website-theme .pricing-card .price {
+  color: var(--site-ink);
+  font-family: var(--site-heading-font);
+}
+
+.website-theme .site-nav-link,
+.website-theme .site-nav button,
+.website-theme .site-dropdown-menu a,
+.website-theme .section-copy,
+.website-theme .hero-copy,
+.website-theme .pricing-card p,
+.website-theme .testimonial-card span,
+.website-theme .logo-card span {
+  color: var(--site-muted);
+}
+
+.website-theme .site-nav-link:hover,
+.website-theme .site-nav-link.active,
+.website-theme .site-nav button.active,
+.website-theme .site-dropdown-menu a:hover {
+  background: var(--site-soft);
+  color: var(--site-ink);
+}
+
+.website-theme .site-menu-toggle,
+.website-theme .site-dropdown-menu {
+  background: var(--site-surface);
+  border-color: var(--site-border);
+  color: var(--site-ink);
+}
+
+.website-theme .hero-section {
+  background: var(--site-hero);
+}
+
+.website-theme .hero-kicker,
+.website-theme .card-link,
+.website-theme .testimonial-card > i {
+  color: var(--site-accent);
+}
+
+.website-theme .btn-primary,
+.website-theme .pricing-card .btn,
+.website-theme .btn-dark {
+  background: var(--site-accent);
+  border-color: var(--site-accent);
+  color: #fff;
+}
+
+.website-theme .btn-outline-dark {
+  border-color: var(--site-ink);
+  color: var(--site-ink);
+}
+
+.website-theme .feature-card,
+.website-theme .logo-card,
+.website-theme .testimonial-card,
+.website-theme .pricing-card {
+  background: var(--site-surface);
+  border-color: var(--site-border);
+  border-radius: var(--site-radius);
+}
+
+.website-theme .feature-icon {
+  background: var(--site-soft);
+  color: var(--site-accent-2);
+}
+
+.website-theme .testimonials-section,
+.website-theme .video-section,
+.website-theme .gallery-section {
+  background: var(--site-soft);
+}
+
+.website-theme .hero-media,
+.website-theme .split-media,
+.website-theme .gallery-tile,
+.website-theme .video-frame {
+  border-radius: var(--site-radius);
+}
+
+.website-theme .cta-band {
+  background: var(--site-cta);
+  color: var(--site-cta-ink);
+}
+
+.website-theme .cta-band .h1 {
+  color: var(--site-cta-ink);
+}
+
+.website-theme .cta-band p {
+  color: var(--site-cta-muted);
+}
+
+.template-studio {
+  --site-bg: #ffffff;
+  --site-surface: #ffffff;
+  --site-soft: #f1f5f9;
+  --site-ink: #111827;
+  --site-muted: #64748b;
+  --site-accent: #2563eb;
+  --site-accent-2: #059669;
+  --site-border: #e5ebf0;
+  --site-hero: linear-gradient(135deg, #f7fbff 0%, #ffffff 48%, #edf7f1 100%);
+}
+
+.template-bold {
+  --site-bg: #fffdf2;
+  --site-surface: #ffffff;
+  --site-soft: #fff3bf;
+  --site-ink: #111827;
+  --site-muted: #5b6472;
+  --site-accent: #dc2626;
+  --site-accent-2: #111827;
+  --site-border: #111827;
+  --site-hero: linear-gradient(135deg, #111827 0 58%, #facc15 58% 76%, #fffdf2 76%);
+  --site-cta: #facc15;
+  --site-cta-ink: #111827;
+  --site-cta-muted: #374151;
+  --site-radius: 2px;
+}
+
+.template-bold .site-navbar {
+  border-bottom: 3px solid #111827;
+}
+
+.template-bold .site-dropdown-menu {
+  box-shadow: 8px 8px 0 #111827;
+}
+
+.template-bold .hero-title,
+.template-bold .hero-copy,
+.template-bold .hero-kicker {
+  color: #fff;
+}
+
+.template-bold .hero-section .btn-primary {
+  background: #facc15;
+  border-color: #facc15;
+  color: #111827;
+}
+
+.template-bold .feature-card,
+.template-bold .logo-card,
+.template-bold .testimonial-card,
+.template-bold .pricing-card {
+  box-shadow: 8px 8px 0 #111827;
+}
+
+.template-editorial {
+  --site-bg: #fbf7ef;
+  --site-surface: #fffaf2;
+  --site-soft: #efe4d2;
+  --site-ink: #1f2937;
+  --site-muted: #7c6651;
+  --site-accent: #b45309;
+  --site-accent-2: #7c2d12;
+  --site-border: #d8c3a7;
+  --site-hero: linear-gradient(90deg, #fbf7ef 0 62%, #efe4d2 62%);
+  --site-cta: #1f2937;
+  --site-heading-font: Georgia, "Times New Roman", serif;
+}
+
+.template-editorial .hero-inner {
+  grid-template-columns: minmax(0, 0.9fr) minmax(min(100%, 280px), 0.7fr);
+}
+
+.template-editorial .hero-title {
+  font-size: clamp(42px, 6vw, 76px);
+  font-weight: 700;
+}
+
+.template-editorial .feature-card,
+.template-editorial .testimonial-card,
+.template-editorial .pricing-card {
+  border-top: 4px solid var(--site-accent);
+}
+
+.template-editorial .logo-card img {
+  filter: sepia(0.35);
+}
+
+.template-neon {
+  --site-bg: #0f1020;
+  --site-surface: #181a31;
+  --site-soft: #11132a;
+  --site-ink: #f8fafc;
+  --site-muted: #a7b3ca;
+  --site-accent: #22d3ee;
+  --site-accent-2: #f472b6;
+  --site-border: rgba(34, 211, 238, 0.28);
+  --site-hero: radial-gradient(circle at 20% 20%, rgba(244, 114, 182, 0.28), transparent 34%), radial-gradient(circle at 80% 10%, rgba(34, 211, 238, 0.24), transparent 32%), #0f1020;
+  --site-cta: linear-gradient(135deg, #22d3ee, #f472b6);
+  --site-cta-ink: #0f1020;
+  --site-cta-muted: #172033;
+}
+
+.template-neon .site-navbar,
+.template-neon .section-pad,
+.template-neon .video-section,
+.template-neon .testimonials-section {
+  background: var(--site-bg);
+}
+
+.template-neon .site-dropdown-menu,
+.template-neon .site-menu-toggle {
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.18), 0 18px 44px rgba(0, 0, 0, 0.26);
+}
+
+.template-neon .feature-card,
+.template-neon .logo-card,
+.template-neon .testimonial-card,
+.template-neon .pricing-card,
+.template-neon .video-frame {
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.18), 0 18px 44px rgba(0, 0, 0, 0.26);
+}
+
+.template-neon .btn-primary,
+.template-neon .pricing-card .btn,
+.template-neon .btn-dark {
+  color: #0f1020;
+}
+
+.template-neon .cta-band {
+  background: var(--site-cta);
+}
+
+.template-earth {
+  --site-bg: #f4f0e7;
+  --site-surface: #fffaf0;
+  --site-soft: #e7ead7;
+  --site-ink: #263629;
+  --site-muted: #64715a;
+  --site-accent: #53755b;
+  --site-accent-2: #d08c60;
+  --site-border: #ccd3bd;
+  --site-hero: linear-gradient(135deg, #e7ead7 0%, #fffaf0 58%, #f4d7c2 100%);
+  --site-cta: #263629;
+  --site-radius: 8px;
+}
+
+.template-earth .hero-inner,
+.template-earth .split-section {
+  gap: clamp(22px, 5vw, 56px);
+}
+
+.template-earth .hero-media,
+.template-earth .split-media,
+.template-earth .gallery-tile {
+  box-shadow: 0 16px 42px rgba(38, 54, 41, 0.16);
+}
+
+.template-earth .feature-icon {
+  color: #d08c60;
+}
