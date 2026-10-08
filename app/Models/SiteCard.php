@@ -21,9 +21,9 @@ class SiteCard extends Model
     ];
 
     public const IMAGE_POSITIONS = [
-        'left' => 'Gambar kiri',
-        'right' => 'Gambar kanan',
-        'top' => 'Gambar atas',
+        'left' => 'Image left',
+        'right' => 'Image right',
+        'top' => 'Image top',
     ];
 
     protected $fillable = [

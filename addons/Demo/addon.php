@@ -5,7 +5,7 @@ use Addons\Demo\Dashboard\DemoOverviewCard;
 return [
     'slug' => 'demo',
     'name' => 'Demo Addon',
-    'description' => 'Contoh addon NovaBase untuk validasi sidebar, dashboard, route, view, dan permission.',
+    'description' => 'NovaBase sample addon for validating sidebar, dashboard, routes, views, and permissions.',
     'icon' => 'package',
     'admin_menu' => [
         [

@@ -1,12 +1,12 @@
 # NovaBase Addons
 
-Folder ini disiapkan untuk fitur produk Novalynk berikutnya. Satu addon sebaiknya punya folder sendiri agar tidak mencampur fitur produk dengan core NovaBase.
+This folder is reserved for future Novalynk product features. Each addon should live in its own folder so product-specific code does not mix with NovaBase core.
 
-Struktur yang disarankan:
+Recommended structure:
 
 ```text
 addons/
-  NamaAddon/
+  AddonName/
     addon.php
     README.md
     routes/
@@ -25,14 +25,14 @@ addons/
       views/
 ```
 
-Kontrak sederhana:
+Simple contract:
 
-- Core NovaBase tetap berisi auth, role, admin shell, page management, dan website renderer.
-- Addon berisi fitur produk spesifik.
-- Jika addon butuh tabel, buat migration di `addons/NamaAddon/database/migrations`.
-- Jika addon butuh menu admin, daftarkan di `addon.php`.
-- Jika addon butuh card dashboard, daftarkan class card di `dashboard_cards`.
-- Jika addon butuh permission, daftarkan di `permissions` dengan format `slug.action`.
-- Jika addon butuh tampilan website, tambah template di `resources/views/website/card-templates` atau buat renderer addon sendiri.
+- NovaBase core owns auth, roles, admin shell, page management, addon registry, and website rendering.
+- Addons own product-specific features.
+- If an addon needs tables, create migrations in `addons/AddonName/database/migrations`.
+- If an addon needs admin menu items, register them in `addon.php`.
+- If an addon needs dashboard cards, register card classes in `dashboard_cards`.
+- If an addon needs permissions, register them in `permissions` using the `slug.action` format.
+- If an addon needs website-facing visuals, add card templates in `resources/views/website/card-templates` or create an addon renderer.
 
-Contoh aktif saat ini ada di `addons/Demo`. Addon baru diaktifkan dari `config/addons.php`.
+The active example is `addons/Demo`. New addons are enabled from `config/addons.php`.

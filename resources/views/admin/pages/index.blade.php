@@ -4,13 +4,11 @@
 <div class="app-layout">
     @include('admin.partials.sidebar')
     <main class="content">
-        <div class="split">
-            <div>
-                <div class="eyebrow">Admin panel</div>
-                <h2>Page Management</h2>
-                <p>Base untuk mengatur konten website dari section/tab dan card.</p>
-            </div>
-        </div>
+        @include('admin.partials.topbar', [
+            'breadcrumb' => 'Page Management',
+            'title' => 'Page Management',
+            'description' => 'Manage website content from sections, tabs, and visual cards.',
+        ])
 
         <div class="table-wrap">
             <table>
@@ -21,7 +19,7 @@
                         <th>Mode</th>
                         <th>Sections</th>
                         <th>Status</th>
-                        <th>Aksi</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>

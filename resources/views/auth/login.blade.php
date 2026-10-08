@@ -5,11 +5,11 @@
     <section class="auth-card">
         <div class="eyebrow">Novalynk base access</div>
         <h2>Login</h2>
-        <p>Masuk ke admin panel NovaBase untuk mengatur akun, halaman, dan addon produk.</p>
+        <p>Sign in to NovaBase to manage accounts, pages, and product addons.</p>
 
         <form method="POST" action="{{ route('login.store') }}">
             @csrf
-            <label for="login">Username atau Email</label>
+            <label for="login">Username or Email</label>
             <input id="login" type="text" name="login" value="{{ old('login') }}" autocomplete="username" required autofocus>
             @error('login')
                 <div class="field-error">{{ $message }}</div>
@@ -18,7 +18,7 @@
             <label for="password">Password</label>
             <div class="password-field">
                 <input id="password" type="password" name="password" autocomplete="current-password" required>
-                <button class="password-toggle" type="button" data-password-toggle="password" aria-label="Lihat password">Lihat</button>
+                <button class="password-toggle" type="button" data-password-toggle="password" aria-label="Show password">Show</button>
             </div>
             @error('password')
                 <div class="field-error">{{ $message }}</div>
@@ -26,10 +26,10 @@
 
             <label class="checkbox-row" for="remember">
                 <input id="remember" type="checkbox" name="remember" value="1">
-                <span>Ingat sesi login</span>
+                <span>Remember this session</span>
             </label>
 
-            <button class="button button-primary full-button" type="submit">Masuk</button>
+            <button class="button button-primary full-button" type="submit">Sign In</button>
         </form>
     </section>
 </main>
@@ -41,8 +41,8 @@
 
             const isHidden = input.type === 'password';
             input.type = isHidden ? 'text' : 'password';
-            button.textContent = isHidden ? 'Tutup' : 'Lihat';
-            button.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Lihat password');
+            button.textContent = isHidden ? 'Hide' : 'Show';
+            button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
         });
     });
 </script>

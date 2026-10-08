@@ -2,17 +2,27 @@
     $addonMenu = app(\App\Core\Addons\AddonRegistry::class)->adminMenuFor(auth()->user());
 @endphp
 
+<button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle menu">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <aside class="sidebar">
-    <div class="stack">
+    <div class="sidebar-brand">
+        <span class="sidebar-brand-mark">NB</span>
         <div>
-            <strong>{{ auth()->user()->name }}</strong>
-            <div class="muted">{{ auth()->user()->email }}</div>
+            <span class="sidebar-brand-name">NovaBase</span>
+            <span class="sidebar-brand-tag">Modular Core</span>
         </div>
-        <nav>
+    </div>
+
+    <div class="sidebar-search">
+        <input class="sidebar-search-input" id="sidebarSearch" type="text" placeholder="Search menu...">
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
             <div class="sidebar-group-label">Admin Panel</div>
-            <a class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">Dashboard</a>
-            <a class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">Akun & Role</a>
-            <a class="{{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.sections.*') || request()->routeIs('admin.cards.*') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}">Page Management</a>
+            <a class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}"><span>Dashboard</span></a>
+            <a class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}"><span>Accounts & Roles</span></a>
+            <a class="{{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.sections.*') || request()->routeIs('admin.cards.*') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}"><span>Page Management</span></a>
 
             @if ($addonMenu->isNotEmpty())
                 <div class="sidebar-group-label">Addons</div>
@@ -20,11 +30,36 @@
                     <details class="sidebar-addon" open>
                         <summary>{{ $group['addon']->name }}</summary>
                         @foreach ($group['items'] as $item)
-                            <a class="{{ request()->routeIs($item['route']) ? 'active' : '' }}" href="{{ route($item['route']) }}">{{ $item['label'] }}</a>
+                            <a class="{{ request()->routeIs($item['route']) ? 'active' : '' }}" href="{{ route($item['route']) }}"><span>{{ $item['label'] }}</span></a>
                         @endforeach
                     </details>
                 @endforeach
             @endif
-        </nav>
+    </nav>
+
+    <div class="sidebar-footer">
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit">Logout</button>
+        </form>
     </div>
 </aside>
+
+<script>
+    (() => {
+        const toggle = document.getElementById('sidebarToggle');
+        const overlay = document.getElementById('sidebarOverlay');
+        const search = document.getElementById('sidebarSearch');
+
+        toggle?.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+        overlay?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+
+        search?.addEventListener('input', () => {
+            const query = search.value.toLowerCase();
+            document.querySelectorAll('#sidebarNav a').forEach((link) => {
+                const label = link.textContent.toLowerCase();
+                link.style.display = label.includes(query) ? '' : 'none';
+            });
+        });
+    })();
+</script>

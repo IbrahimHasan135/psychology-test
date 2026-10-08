@@ -1,11 +1,11 @@
 # NovaBase
 
-Base Laravel hijau untuk produk Novalynk: website utama, login, admin panel, akun, role, page management, dan folder addon untuk fitur produk berikutnya.
+Green Laravel base for Novalynk products: public website, login, admin panel, accounts, roles, page management, and modular addons for future product features.
 
-## Setup Local XAMPP
+## Local XAMPP Setup
 
-1. Buat database MySQL bernama `novabase` atau sesuaikan di `.env`.
-2. Pastikan `.env` mengarah ke database local:
+1. Create a MySQL database named `novabase`, or adjust the name in `.env`.
+2. Make sure `.env` points to your local database:
 
 ```env
 DB_CONNECTION=mysql
@@ -16,40 +16,43 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-3. Jalankan migration dan seeder:
+3. Run migrations and seeders:
 
 ```bash
 /opt/lampp/bin/php artisan migrate --seed
 ```
 
-4. Akses lewat Apache tanpa `/public`:
+4. Open through Apache without `/public`:
 
 ```text
 http://localhost/github/psychology-test
 ```
 
-Root project sudah punya `index.php` dan `.htaccess` agar bisa dipakai di shared hosting/subfolder. Mode paling ideal tetap mengarahkan document root hosting ke folder `public/` kalau panel hosting mendukungnya.
+The project root already contains `index.php` and `.htaccess` for shared hosting or subfolder deployments. The ideal hosting setup is still pointing the document root to `public/` when your hosting panel supports it.
 
-Atau lewat Laravel dev server:
+Or use the Laravel dev server:
 
 ```bash
 /opt/lampp/bin/php artisan serve
 ```
 
-## Auto Create/Update Table
+## Auto Migration And Seeding
 
-`DB_AUTO_MIGRATE=true` membuat Laravel menjalankan migration otomatis saat website diakses. Ini akan membuat tabel yang belum ada dan menjalankan perubahan tabel yang sudah ditulis di `database/migrations`. `DB_AUTO_SEED=true` memastikan data awal wajib, termasuk akun Super Admin, otomatis diisi kalau belum ada.
+`DB_AUTO_MIGRATE=true` lets Laravel run migrations automatically when the website is accessed. It creates missing tables and applies changes already defined in `database/migrations`.
 
-Catatan penting: database MySQL-nya tetap harus dibuat dulu, misalnya `novabase`. Laravel migration mengurus tabel di dalam database, bukan membuat database MySQL baru.
+`DB_AUTO_SEED=true` keeps required seed data available, including the default Super Admin account.
 
-Kalau di hosting production ingin lebih aman, ubah ke:
+Important: the MySQL database itself must still be created first, for example `novabase`. Laravel migrations manage tables inside the database, not the database creation.
+
+For production hosting, you can disable automatic migration:
 
 ```env
 DB_AUTO_MIGRATE=false
 ```
 
-Lalu jalankan migration manual dari terminal atau import SQL.
-## Akun Default
+Then run migrations manually from terminal or import SQL from a prepared local database.
+
+## Default Accounts
 
 | Role | Login | Password |
 | --- | --- | --- |
@@ -57,47 +60,47 @@ Lalu jalankan migration manual dari terminal atau import SQL.
 | Admin | `admin` | `password` |
 | User | `user` | `password` |
 
-Seeder akan memperbarui akun default jika sudah ada, jadi perubahan password Super Admin ikut diterapkan saat `DB_AUTO_SEED=true` atau saat menjalankan `php artisan db:seed`.
+The seeder updates default accounts when they already exist, so Super Admin password changes are applied when `DB_AUTO_SEED=true` or when running `php artisan db:seed`.
 
 ## Addon System
 
-NovaBase sudah punya fondasi addon seperti konsep NovaStore, tetapi memakai pola Laravel.
+NovaBase includes a Laravel-native addon foundation inspired by NovaStore.
 
-- Daftar addon aktif ada di `config/addons.php`.
-- Setiap addon punya manifest `addons/NamaAddon/addon.php`.
-- Route addon ada di `addons/NamaAddon/routes/web.php`.
-- Class addon memakai namespace `Addons\NamaAddon\...` dan file-nya berada di `addons/NamaAddon/app`.
-- View addon otomatis bisa dipanggil dengan namespace slug, contoh `view('demo::index')`.
-- Migration addon otomatis dibaca dari `addons/NamaAddon/database/migrations`.
-- Sidebar admin dan dashboard membaca menu/card dari manifest addon.
-- Role mempengaruhi akses addon lewat tabel `role_addon_permissions`.
+- Active addons are listed in `config/addons.php`.
+- Each addon has a manifest at `addons/AddonName/addon.php`.
+- Addon routes live in `addons/AddonName/routes/web.php`.
+- Addon classes use the `Addons\AddonName\...` namespace and live under `addons/AddonName/app`.
+- Addon views are automatically namespaced by slug, for example `view('demo::index')`.
+- Addon migrations are loaded from `addons/AddonName/database/migrations`.
+- The admin sidebar and dashboard read addon menus and cards from addon manifests.
+- Roles control addon access through `role_addon_permissions`.
 
-Contoh aktif saat ini ada di `addons/Demo`.
+The current working example is `addons/Demo`.
 
-## Deploy Tanpa Composer di Hosting
+## Deploy Without Composer On Hosting
 
-Folder `vendor/` sengaja ikut Git agar setelah clone/upload hosting bisa langsung menemukan dependency Laravel. Yang tetap tidak ikut Git adalah `.env`, jadi copy dari `.env.example` lalu sesuaikan database hosting.
+The `vendor/` folder is intentionally committed so cloned/uploaded hosting copies can find Laravel dependencies immediately. The `.env` file is still not committed, so copy it from `.env.example` and adjust hosting database credentials.
 
-Setelah database dibuat, jalankan migration jika hosting menyediakan terminal:
+After the database is created, run migrations if your hosting provides terminal access:
 
 ```bash
 php artisan migrate --seed
 ```
 
-Kalau hosting tidak punya terminal, jalankan migration di local lalu export/import SQL ke database hosting.
+If terminal access is unavailable, run migrations locally and export/import the SQL database.
 
 ## Page Management
 
-Admin panel punya menu `Page Management` untuk mengatur Home page. Mode tampilannya bisa `Section scroll` atau `Tabs`. Isi website dibangun dari section/tab dan card. Desain card dipisahkan di `resources/views/website/card-templates`, sehingga next project bisa mengganti template visual tanpa mengubah data konten.
+The admin panel includes `Page Management` for managing the Home page. Display mode can be `Section scroll` or `Tabs`. Website content is built from sections/tabs and cards. Card designs are separated in `resources/views/website/card-templates`, so future projects can replace visual templates without changing content data.
 
-## Struktur Fitur
+## Feature Structure
 
-- Website utama: `WebsiteController`, `resources/views/website`.
+- Public website: `WebsiteController`, `resources/views/website`.
 - Login/logout: `Auth/LoginController`, `resources/views/auth`.
 - Admin panel: `Admin/*Controller`, `resources/views/admin`.
 - User area: `User/*Controller`, `resources/views/user`.
-- Role: `app/Enums/UserRole.php` dan `app/Http/Middleware/EnsureUserHasRole.php`.
-- Addon registry: `app/Core/Addons`, `config/addons.php`, dan `addons/*`.
-- Tabel otomatis: tambah migration di `database/migrations`, lalu jalankan `artisan migrate`.
+- Roles: `app/Enums/UserRole.php` and `app/Http/Middleware/EnsureUserHasRole.php`.
+- Addon registry: `app/Core/Addons`, `config/addons.php`, and `addons/*`.
+- Automatic tables: add migrations to `database/migrations` or addon migration folders, then run `artisan migrate`.
 
-Catatan arsitektur lebih lengkap ada di `docs/ARCHITECTURE.md`.
+Detailed architecture notes are in `docs/ARCHITECTURE.md`.

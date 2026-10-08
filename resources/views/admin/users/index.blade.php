@@ -1,22 +1,20 @@
-@extends('layouts.app', ['title' => 'Akun & Role'])
+@extends('layouts.app', ['title' => 'Accounts & Roles'])
 
 @section('content')
 <div class="app-layout">
     @include('admin.partials.sidebar')
     <main class="content">
-        <div class="split">
-            <div>
-                <div class="eyebrow">Admin panel</div>
-                <h2>Akun & Role</h2>
-                <p>Base listing untuk pengelolaan akun dan visibility permission addon.</p>
-            </div>
-        </div>
+        @include('admin.partials.topbar', [
+            'breadcrumb' => 'Accounts & Roles',
+            'title' => 'Accounts & Roles',
+            'description' => 'Manage user visibility and addon permissions from the NovaBase admin workspace.',
+        ])
 
         <section class="admin-panel">
             <div class="split compact-split">
                 <div>
                     <h3>Addon Permissions</h3>
-                    <p>Super Admin otomatis punya semua akses. Admin/User mengikuti permission addon yang tercatat di database.</p>
+                    <p>Super Admin has full access. Admin and User roles follow addon permissions stored in the database.</p>
                 </div>
             </div>
             <div class="permission-grid">
@@ -37,7 +35,7 @@
                         @endforeach
                     </article>
                 @empty
-                    <div class="empty-state">Belum ada addon permission.</div>
+                    <div class="empty-state">No addon permissions are registered.</div>
                 @endforelse
             </div>
         </section>
@@ -46,11 +44,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Nama</th>
+                        <th>Name</th>
                         <th>Username</th>
                         <th>Email</th>
                         <th>Role</th>
-                        <th>Dibuat</th>
+                        <th>Created</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,7 +62,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">Belum ada akun.</td>
+                            <td colspan="5">No accounts found.</td>
                         </tr>
                     @endforelse
                 </tbody>
