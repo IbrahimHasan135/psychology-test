@@ -3,9 +3,9 @@
 @section('content')
 <main class="auth-wrap">
     <section class="auth-card">
-        <div class="eyebrow">Account gateway</div>
+        <div class="eyebrow">Novalynk base access</div>
         <h2>Login</h2>
-        <p>Role akun menentukan apakah masuk ke admin panel atau dashboard user.</p>
+        <p>Masuk ke admin panel NovaBase untuk mengatur akun, halaman, dan addon produk.</p>
 
         <form method="POST" action="{{ route('login.store') }}">
             @csrf

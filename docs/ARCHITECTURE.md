@@ -1,6 +1,6 @@
-# Architecture Notes
+# NovaBase Architecture Notes
 
-Base ini memakai Laravel MVC standar supaya mudah dibaca walaupun latar utama bukan web engineering.
+NovaBase memakai Laravel MVC standar supaya setiap produk Novalynk bisa dimulai dari pondasi yang sama dan fitur baru tinggal masuk sebagai addon atau modul admin.
 
 ## Lapisan Utama
 
@@ -36,12 +36,13 @@ Konfigurasi default diarahkan ke MySQL XAMPP:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=psychology_test
+DB_DATABASE=novabase
 DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Buat database `psychology_test` di phpMyAdmin atau MySQL CLI, lalu jalankan migration dan seeder.
+Buat database `novabase` di phpMyAdmin atau MySQL CLI, lalu jalankan migration dan seeder.
+
 ## Website Page Builder
 
 Modul website builder dipisahkan antara data konten dan template desain.

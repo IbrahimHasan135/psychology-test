@@ -1,17 +1,17 @@
-# Psychology Test
+# NovaBase
 
-Base Laravel untuk website utama, login, admin panel, akun, dan role.
+Base Laravel hijau untuk produk Novalynk: website utama, login, admin panel, akun, role, page management, dan folder addon untuk fitur produk berikutnya.
 
 ## Setup Local XAMPP
 
-1. Buat database MySQL bernama `psychology_test`.
+1. Buat database MySQL bernama `novabase` atau sesuaikan di `.env`.
 2. Pastikan `.env` mengarah ke database local:
 
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=psychology_test
+DB_DATABASE=novabase
 DB_USERNAME=root
 DB_PASSWORD=
 ```
@@ -40,7 +40,7 @@ Atau lewat Laravel dev server:
 
 `DB_AUTO_MIGRATE=true` membuat Laravel menjalankan migration otomatis saat website diakses. Ini akan membuat tabel yang belum ada dan menjalankan perubahan tabel yang sudah ditulis di `database/migrations`. `DB_AUTO_SEED=true` memastikan data awal wajib, termasuk akun Super Admin, otomatis diisi kalau belum ada.
 
-Catatan penting: database MySQL-nya tetap harus dibuat dulu, misalnya `psychology_test`. Laravel migration mengurus tabel di dalam database, bukan membuat database MySQL baru.
+Catatan penting: database MySQL-nya tetap harus dibuat dulu, misalnya `novabase`. Laravel migration mengurus tabel di dalam database, bukan membuat database MySQL baru.
 
 Kalau di hosting production ingin lebih aman, ubah ke:
 

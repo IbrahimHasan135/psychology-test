@@ -3,19 +3,19 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? config('app.name', 'Psychology Test') }}</title>
+    <title>{{ $title ?? config('app.name', 'NovaBase') }}</title>
     <style>
         :root {
-            --green-950: #052e24;
-            --green-900: #064434;
-            --green-800: #0c6048;
-            --green-700: #0f7a55;
-            --green-500: #27b36a;
-            --green-300: #8fe3a7;
-            --mint: #effbf2;
-            --ink: #10231d;
-            --muted: #5f746b;
-            --line: #dbe9df;
+            --green-950: #04251d;
+            --green-900: #063b2f;
+            --green-800: #07553f;
+            --green-700: #08724f;
+            --green-500: #16a05d;
+            --green-300: #89e2a1;
+            --mint: #edf9f1;
+            --ink: #0f211b;
+            --muted: #60766d;
+            --line: #d8e9dd;
             --white: #ffffff;
             --amber: #f7c948;
         }
@@ -25,7 +25,7 @@
             min-height: 100vh;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             color: var(--ink);
-            background: #f5fbf7;
+            background: #f6fbf7;
             letter-spacing: 0;
         }
         a { color: inherit; text-decoration: none; }
@@ -38,7 +38,7 @@
             gap: 24px;
             padding: 0 clamp(20px, 5vw, 72px);
             border-bottom: 1px solid rgba(12, 96, 72, .12);
-            background: rgba(245, 251, 247, .86);
+            background: rgba(246, 251, 247, .92);
             backdrop-filter: blur(18px);
             position: sticky;
             top: 0;
@@ -201,8 +201,8 @@
 <div class="site-shell">
     <header class="topbar">
         <a class="brand" href="{{ route('home') }}">
-            <span class="brand-mark">PT</span>
-            <span>{{ config('app.name', 'Psychology Test') }}</span>
+            <span class="brand-mark">NB</span>
+            <span>{{ config('app.name', 'NovaBase') }}</span>
         </a>
         <nav class="nav">
             @auth
