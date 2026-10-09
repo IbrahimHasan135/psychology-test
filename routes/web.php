@@ -35,12 +35,12 @@ $adminRoutes = static function (string $prefix, string $namePrefix, array $middl
 
 Route::get('/', [WebsiteController::class, 'home'])->middleware('resolve.tenant')->name('home');
 
-Route::middleware(['guest', 'resolve.tenant'])->group(function (): void {
+Route::middleware(['resolve.tenant'])->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 });
 
-Route::middleware(['guest', 'resolve.tenant'])->prefix('{tenant}')->name('tenant.')->group(function (): void {
+Route::middleware(['resolve.tenant'])->prefix('{tenant}')->name('tenant.')->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 });

@@ -94,6 +94,24 @@ class User extends Authenticatable
         return nova_route($this->dashboardRoute());
     }
 
+    public function isAuthenticatedInCurrentContext(): bool
+    {
+        if (! auth()->check()) {
+            return false;
+        }
+
+        $context = app(TenantContext::class);
+        if (! $context->isScopedRequest()) {
+            return true;
+        }
+
+        return $context->isActiveSession()
+            && $this->memberships()
+                ->where('tenant_id', $context->id())
+                ->where('status', 'active')
+                ->exists();
+    }
+
     public function effectiveRole(): string
     {
         return app(TenantContext::class)->roleFor($this) ?: (string) $this->role;
@@ -163,6 +181,16 @@ class User extends Authenticatable
 
         if (! Schema::hasTable('role_addon_permissions')) {
             return false;
+        }
+
+        if (app(TenantContext::class)->isScopedRequest() && $this->effectiveRole() === UserRole::SUPER_ADMIN) {
+            $addonSlug = str($permission)->before('.')->toString();
+
+            return DB::table('tenant_addons')
+                ->where('tenant_id', app(TenantContext::class)->id())
+                ->where('addon_slug', $addonSlug)
+                ->where('status', 'active')
+                ->exists();
         }
 
         $query = DB::table('role_addon_permissions')

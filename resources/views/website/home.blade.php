@@ -2,6 +2,7 @@
 
 @section('content')
 <main class="website-page">
+    @php($isAuthenticatedInContext = auth()->user()?->isAuthenticatedInCurrentContext() ?? false)
     @if ($errors->any())
         <div class="page form-feedback form-feedback-error">{{ $errors->first() }}</div>
     @endif
@@ -9,7 +10,7 @@
         <div class="page form-feedback form-feedback-success">{{ session("status") }}</div>
     @endif
     @if (!empty($builderState))
-        @php($novabaseAuth = auth()->check() ? [
+        @php($novabaseAuth = $isAuthenticatedInContext ? [
             'authenticated' => true,
             'label' => auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal',
             'url' => auth()->user()->dashboardUrl(),
@@ -76,7 +77,7 @@
                 <h1>NovaBase</h1>
                 <p>A green Laravel foundation for modular products, admin panels, landing pages, addon features, roles, and future client deployments.</p>
                 <div class="hero-actions">
-                    @auth
+                    @if ($isAuthenticatedInContext)
                         <a class="button button-primary" href="{{ auth()->user()->dashboardUrl() }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
                     @else
                         <a class="button button-primary" href="{{ nova_route('login') }}">Login</a>

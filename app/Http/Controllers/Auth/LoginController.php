@@ -67,6 +67,14 @@ class LoginController extends Controller
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
+        if ($context->isScopedRequest()) {
+            $request->session()->put('novabase.active_tenant_slug', $context->tenant()?->slug);
+        } elseif ($ownedTenant) {
+            $request->session()->put('novabase.active_tenant_slug', $ownedTenant->slug);
+        } else {
+            $request->session()->forget('novabase.active_tenant_slug');
+        }
+
         if ($ownedTenant) {
             return redirect()->route('tenant.admin.dashboard', ['tenant' => $ownedTenant->slug]);
         }
@@ -76,6 +84,11 @@ class LoginController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        $context = app(TenantContext::class);
+        if ($context->isScopedRequest() && ! $context->isActiveSession()) {
+            return redirect()->route('tenant.home', ['tenant' => $context->tenant()->slug]);
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();

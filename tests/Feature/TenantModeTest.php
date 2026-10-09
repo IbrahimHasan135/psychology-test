@@ -117,6 +117,14 @@ class TenantModeTest extends TestCase
             'slug' => 'home',
             'name' => 'GBI Home Updated',
         ]);
+
+        $this->assertDatabaseHas('tenant_addons', [
+            'tenant_id' => $tenant->id,
+            'addon_slug' => 'demo',
+            'status' => 'active',
+        ]);
+
+        $this->get(route('tenant.admin.addons.demo.index', ['tenant' => 'gbi']))->assertOk();
     }
 
     public function test_public_tenant_signup_creates_owner_and_redirects_to_tenant_login(): void
@@ -168,5 +176,85 @@ class TenantModeTest extends TestCase
 
         $this->assertDatabaseHas('tenants', ['slug' => 'admin-card-demo']);
         $this->assertDatabaseHas('users', ['username' => 'admin_card_owner']);
+    }
+
+    public function test_default_tenant_urls_redirect_to_the_main_application(): void
+    {
+        $this->seed();
+
+        $this->get('/default/login')->assertRedirect(route('login'));
+        $this->get('/default')->assertRedirect(route('home'));
+    }
+
+    public function test_active_tenant_session_is_not_presented_as_logged_in_on_another_tenant(): void
+    {
+        $this->seed();
+        $owner = User::query()->where('username', 'user')->firstOrFail();
+        $tenantA = Tenant::query()->create(['slug' => 'tenant-a', 'name' => 'Tenant A', 'status' => 'active']);
+        $tenantB = Tenant::query()->create(['slug' => 'tenant-b', 'name' => 'Tenant B', 'status' => 'active']);
+
+        foreach ([$tenantA, $tenantB] as $tenant) {
+            $owner->memberships()->create([
+                'tenant_id' => $tenant->id,
+                'role' => UserRole::SUPER_ADMIN,
+                'status' => 'active',
+            ]);
+            SitePage::query()->withoutGlobalScopes()->create([
+                'tenant_id' => $tenant->id,
+                'name' => 'Home',
+                'slug' => 'home',
+                'display_mode' => 'sections',
+                'is_published' => true,
+            ]);
+        }
+
+        $this->actingAs($owner)->withSession(['novabase.active_tenant_slug' => 'tenant-a'])
+            ->get(route('tenant.home', ['tenant' => 'tenant-b']))
+            ->assertOk()
+            ->assertSee('Login')
+            ->assertDontSee('User Portal');
+
+        $this->withSession(['novabase.active_tenant_slug' => 'tenant-a'])
+            ->get(route('tenant.admin.dashboard', ['tenant' => 'tenant-b']))
+            ->assertForbidden();
+    }
+
+    public function test_login_can_switch_from_one_tenant_to_another_without_guest_redirect(): void
+    {
+        $this->seed();
+        $tenantA = Tenant::query()->create(['slug' => 'switch-a', 'name' => 'Switch A', 'status' => 'active']);
+        $tenantB = Tenant::query()->create(['slug' => 'switch-b', 'name' => 'Switch B', 'status' => 'active']);
+        $ownerA = User::factory()->create(['username' => 'switch_owner_a', 'email' => 'switch-a@example.test']);
+        $ownerB = User::factory()->create(['username' => 'switch_owner_b', 'email' => 'switch-b@example.test']);
+
+        foreach ([[$tenantA, $ownerA], [$tenantB, $ownerB]] as [$tenant, $owner]) {
+            $owner->memberships()->create([
+                'tenant_id' => $tenant->id,
+                'role' => UserRole::SUPER_ADMIN,
+                'status' => 'active',
+            ]);
+            SitePage::query()->withoutGlobalScopes()->create([
+                'tenant_id' => $tenant->id,
+                'name' => 'Home',
+                'slug' => 'home',
+                'display_mode' => 'sections',
+                'is_published' => true,
+            ]);
+        }
+
+        $this->post(route('tenant.login.store', ['tenant' => 'switch-a']), [
+            'login' => 'switch_owner_a',
+            'password' => 'password',
+        ])->assertRedirect(route('tenant.admin.dashboard', ['tenant' => 'switch-a']));
+
+        $this->get(route('tenant.login', ['tenant' => 'switch-b']))->assertOk();
+
+        $this->post(route('tenant.login.store', ['tenant' => 'switch-b']), [
+            'login' => 'switch_owner_b',
+            'password' => 'password',
+        ])->assertRedirect(route('tenant.admin.dashboard', ['tenant' => 'switch-b']));
+
+        $this->get(route('tenant.admin.dashboard', ['tenant' => 'switch-a']))->assertForbidden();
+        $this->get(route('tenant.admin.dashboard', ['tenant' => 'switch-b']))->assertOk();
     }
 }

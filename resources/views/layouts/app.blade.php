@@ -387,8 +387,9 @@
             <span class="brand-mark">NB</span>
             <span>{{ config('app.name', 'NovaBase') }}</span>
         </a>
+        @php($isAuthenticatedInContext = auth()->user()?->isAuthenticatedInCurrentContext() ?? false)
         <nav class="nav">
-            @auth
+            @if ($isAuthenticatedInContext)
                 <a href="{{ auth()->user()->dashboardUrl() }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
                 <form method="POST" action="{{ nova_route('logout') }}">
                     @csrf

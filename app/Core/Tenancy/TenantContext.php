@@ -37,6 +37,15 @@ class TenantContext
         return $this->scopedRequest;
     }
 
+    public function isActiveSession(): bool
+    {
+        if (! $this->scopedRequest || $this->tenant === null) {
+            return true;
+        }
+
+        return session()->get('novabase.active_tenant_slug') === $this->tenant->slug;
+    }
+
     public function roleFor(User $user): string
     {
         if (! $this->scopedRequest) {

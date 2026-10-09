@@ -15,7 +15,12 @@ class EnsureTenantMembership
         $user = $request->user();
 
         if ($context->isScopedRequest()) {
-            abort_unless($user && $user->memberships()->where('tenant_id', $context->id())->where('status', 'active')->exists(), 403);
+            abort_unless(
+                $user
+                && $context->isActiveSession()
+                && $user->memberships()->where('tenant_id', $context->id())->where('status', 'active')->exists(),
+                403
+            );
         }
 
         return $next($request);

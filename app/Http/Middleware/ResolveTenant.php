@@ -31,6 +31,18 @@ class ResolveTenant
         if ($slug !== null) {
             abort_unless($enabled, 404);
             $tenant = Tenant::query()->where('slug', $slug)->where('status', 'active')->firstOrFail();
+
+            if ($tenant->slug === config('novabase.tenancy.default_slug', 'default')) {
+                $path = ltrim($request->path(), '/');
+                $path = preg_replace('/^'.preg_quote($tenant->slug, '/').'(?=\/|$)/', '', $path) ?? '';
+                $target = url($path === '' ? '/' : '/'.ltrim($path, '/'));
+                if ($request->getQueryString()) {
+                    $target .= '?'.$request->getQueryString();
+                }
+
+                return redirect()->to($target);
+            }
+
             $context->set($tenant, true);
             URL::defaults(['tenant' => $tenant->slug]);
 
