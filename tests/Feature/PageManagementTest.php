@@ -20,7 +20,8 @@ class PageManagementTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.pages.index'))
             ->assertOk()
-            ->assertSee('Page Management');
+            ->assertSee('Web Editor')
+            ->assertSee('Demo Promo Card');
     }
 
     public function test_admin_can_add_section_and_card_to_home(): void

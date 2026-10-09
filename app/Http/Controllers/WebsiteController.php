@@ -6,10 +6,11 @@ use App\Models\SitePage;
 use App\Core\PageBuilder\BlockRegistry;
 use App\Core\PageBuilder\PageBuilderService;
 use Illuminate\View\View;
+use App\Core\PageBuilder\PageBuilderRegistry;
 
 class WebsiteController extends Controller
 {
-    public function home(PageBuilderService $builder): View
+    public function home(PageBuilderService $builder, PageBuilderRegistry $registry): View
     {
         $page = SitePage::query()
             ->where('slug', 'home')
@@ -25,10 +26,11 @@ class WebsiteController extends Controller
             'page' => $page,
             'builderState' => $builderState,
             'designTemplates' => BlockRegistry::templates(),
+            'blockDefinitions' => $registry->definitions(),
         ]);
     }
 
-    public function page(SitePage $page, PageBuilderService $builder): View
+    public function page(SitePage $page, PageBuilderService $builder, PageBuilderRegistry $registry): View
     {
         abort_unless($page->is_published, 404);
 
@@ -36,6 +38,7 @@ class WebsiteController extends Controller
             'page' => $page->load(['activeSections.activeCards', 'blocks']),
             'builderState' => $builder->editorState($page, true),
             'designTemplates' => BlockRegistry::templates(),
+            'blockDefinitions' => $registry->definitions(),
         ]);
     }
 }

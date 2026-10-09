@@ -8,6 +8,7 @@ use App\Models\SitePage;
 use App\Models\SiteSection;
 use App\Core\PageBuilder\BlockRegistry;
 use App\Core\PageBuilder\PageBuilderService;
+use App\Core\PageBuilder\PageBuilderRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,29 +17,29 @@ use Illuminate\View\View;
 
 class PageManagementController extends Controller
 {
-    public function index(PageBuilderService $builder): View
+    public function index(PageBuilderService $builder, PageBuilderRegistry $registry): View
     {
         $page = SitePage::query()->where('slug', 'home')->firstOrFail();
 
-        return $this->editorView($page, $builder);
+        return $this->editorView($page, $builder, $registry);
     }
 
-    public function edit(SitePage $page, PageBuilderService $builder): View
+    public function edit(SitePage $page, PageBuilderService $builder, PageBuilderRegistry $registry): View
     {
-        return $this->editorView($page, $builder);
+        return $this->editorView($page, $builder, $registry);
     }
 
-    private function editorView(SitePage $page, PageBuilderService $builder): View
+    private function editorView(SitePage $page, PageBuilderService $builder, PageBuilderRegistry $registry): View
     {
         return view('admin.pages.editor', [
             'page' => $page,
             'builderState' => $builder->editorState($page),
-            'blockDefinitions' => BlockRegistry::definitions(),
+            'blockDefinitions' => $registry->definitions(request()->user()),
             'designTemplates' => BlockRegistry::templates(),
         ]);
     }
 
-    public function saveSiteBuilder(Request $request, PageBuilderService $builder): JsonResponse
+    public function saveSiteBuilder(Request $request, PageBuilderService $builder, PageBuilderRegistry $registry): JsonResponse
     {
         $validated = $request->validate([
             'template' => ['required', Rule::in(array_keys(BlockRegistry::templates()))],
@@ -49,7 +50,7 @@ class PageManagementController extends Controller
             'pages.*.path' => ['required', 'string', 'max:121', 'regex:/^\/(?:[A-Za-z0-9][A-Za-z0-9-]*)?$/', 'distinct'],
             'pages.*.blocks' => ['present', 'array', 'max:100'],
             'pages.*.blocks.*.id' => ['required', 'string', 'alpha_dash', 'max:80', 'distinct'],
-            'pages.*.blocks.*.type' => ['required', Rule::in(array_keys(BlockRegistry::definitions()))],
+            'pages.*.blocks.*.type' => ['required', Rule::in(array_keys($registry->definitions($request->user())))],
             'pages.*.blocks.*.navEnabled' => ['required', 'boolean'],
             'pages.*.blocks.*.navLabel' => ['nullable', 'string', 'max:120'],
             'pages.*.blocks.*.data' => ['required', 'array'],
@@ -57,7 +58,7 @@ class PageManagementController extends Controller
 
         foreach ($validated['pages'] as $pageState) {
             foreach ($pageState['blocks'] as $block) {
-                $this->validateBlockData($block['type'], $block['data']);
+                $this->validateBlockData($block['type'], $block['data'], $registry, $request->user());
             }
         }
 
@@ -68,7 +69,7 @@ class PageManagementController extends Controller
         ]);
     }
 
-    public function saveBuilder(Request $request, SitePage $page, PageBuilderService $builder): JsonResponse
+    public function saveBuilder(Request $request, SitePage $page, PageBuilderService $builder, PageBuilderRegistry $registry): JsonResponse
     {
         $validated = $request->validate([
             'page.name' => ['required', 'string', 'max:255'],
@@ -76,14 +77,14 @@ class PageManagementController extends Controller
             'page.published' => ['required', 'boolean'],
             'blocks' => ['present', 'array', 'max:100'],
             'blocks.*.id' => ['required', 'string', 'max:80', 'distinct'],
-            'blocks.*.type' => ['required', Rule::in(array_keys(BlockRegistry::definitions()))],
+            'blocks.*.type' => ['required', Rule::in(array_keys($registry->definitions($request->user())))],
             'blocks.*.navEnabled' => ['required', 'boolean'],
             'blocks.*.navLabel' => ['nullable', 'string', 'max:120'],
             'blocks.*.data' => ['required', 'array'],
         ]);
 
         foreach ($validated['blocks'] as $block) {
-            $this->validateBlockData($block['type'], $block['data']);
+            $this->validateBlockData($block['type'], $block['data'], $registry, $request->user());
         }
 
         $builder->save($page, $validated);
@@ -91,9 +92,9 @@ class PageManagementController extends Controller
         return response()->json(['saved' => true, 'savedAt' => now()->toIso8601String()]);
     }
 
-    private function validateBlockData(string $type, array $data): void
+    private function validateBlockData(string $type, array $data, PageBuilderRegistry $registry, ?\App\Models\User $user): void
     {
-        $defaults = BlockRegistry::defaults($type);
+        $defaults = $registry->defaults($type, $user);
         $rules = [];
         foreach ($defaults as $key => $default) {
             $maxLength = preg_match('/image/i', $key) ? 5_500_000 : 5000;

@@ -6,6 +6,7 @@ import { setByPath } from './objectPath.js';
 import { createInitialState, findBlock, getActivePage, saveState } from './state.js';
 import { slugify } from './slug.js';
 import { designTemplates } from './templates.js';
+import { blockDefinitions } from './blockRegistry.js';
 
 export class VisualEditor {
   constructor(state) {
@@ -13,6 +14,7 @@ export class VisualEditor {
     this.nodes = {
       pageList: document.querySelector('#pageList'),
       templateList: document.querySelector('#templateList'),
+      blockPalette: document.querySelector('#blockPalette'),
       siteCanvas: document.querySelector('#siteCanvas'),
       addPageBtn: document.querySelector('#addPageBtn'),
       inspectorContent: document.querySelector('#inspectorContent'),
@@ -47,6 +49,7 @@ export class VisualEditor {
     this.applyMode();
     this.renderPages();
     this.renderTemplates();
+    this.renderBlockPalette();
     this.nodes.siteCanvas.innerHTML = renderWebsite(this.state);
     this.renderInspector();
     this.bindCanvasEvents();
@@ -70,6 +73,16 @@ export class VisualEditor {
           <strong>${template.name}</strong>
           <small>${template.description}</small>
         </span>
+      </button>
+    `).join('');
+  }
+
+  renderBlockPalette() {
+    if (!this.nodes.blockPalette) return;
+    this.nodes.blockPalette.innerHTML = Object.entries(blockDefinitions).map(([type, definition]) => `
+      <button class="palette-item" data-add-block="${escapeHtml(type)}">
+        <i class="bi ${escapeHtml(definition.icon || 'bi-layout-text-window')}"></i>
+        <span>${escapeHtml(definition.label || type)}</span>
       </button>
     `).join('');
   }
@@ -106,8 +119,10 @@ export class VisualEditor {
       this.render();
     });
 
-    document.querySelectorAll('[data-add-block]').forEach((button) => {
-      button.addEventListener('click', () => this.addBlock(button.dataset.addBlock));
+    this.nodes.blockPalette?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-add-block]');
+      if (!button) return;
+      this.addBlock(button.dataset.addBlock);
     });
 
     document.querySelectorAll('[data-viewport]').forEach((button) => {

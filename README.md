@@ -87,7 +87,7 @@ The current working example is `addons/Demo`.
 
 ## Deploy Without Composer On Hosting
 
-The `vendor/` folder is intentionally committed so cloned/uploaded hosting copies can find Laravel dependencies immediately. The `.env` file is still not committed, so copy it from `.env.example` and adjust hosting database credentials.
+The `vendor/` folder is not committed. Every clone or deployment must run `composer install` using the committed `composer.lock`. The `.env` file is also not committed, so copy it from `.env.example` and adjust the database credentials.
 
 After the database is created, run migrations if your hosting provides terminal access:
 
@@ -97,9 +97,9 @@ php artisan migrate --seed
 
 If terminal access is unavailable, run migrations locally and export/import the SQL database.
 
-## Page Management
+## Web Editor
 
-The admin panel includes `Page Management` for managing the Home page. Display mode can be `Section scroll` or `Tabs`. Website content is built from sections/tabs and cards. Card designs are separated in `resources/views/website/card-templates`, so future projects can replace visual templates without changing content data.
+The admin panel includes `Web Editor` for managing the Home page. Display mode can be `Section scroll` or `Tabs`. Website content is built from sections/tabs and cards. Card designs are separated in `resources/views/website/card-templates`, so future projects can replace visual templates without changing content data.
 
 ## Feature Structure
 
@@ -112,3 +112,92 @@ The admin panel includes `Page Management` for managing the Home page. Display m
 - Automatic tables: add migrations to `database/migrations` or addon migration folders, then run `artisan migrate`.
 
 Detailed architecture notes are in `docs/ARCHITECTURE.md`.
+
+## Exact Runtime Requirements
+
+This repository currently targets:
+
+- PHP ^8.2, compatible with Laravel 12.
+- Laravel Framework ^12.0. The lockfile pins the installed patch versions.
+- Composer 2.x.
+- Apache with mod_rewrite for the subfolder entrypoint.
+- MySQL or MariaDB compatible with Laravel drivers.
+- Node.js/npm only when a frontend build is added. Current Web Editor assets are static.
+
+Do not manually install a random Laravel version. This is an existing Laravel 12 project, so use the repository lockfile.
+
+## Installation After Vendor Removal
+
+From a fresh clone:
+
+    git clone <repository-url>
+    cd psychology-test
+    composer install --no-interaction --prefer-dist
+    cp .env.example .env
+    php artisan key:generate
+
+Create the MySQL database first, then configure .env:
+
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=novabase
+    DB_USERNAME=root
+    DB_PASSWORD=
+
+Run setup:
+
+    php artisan migrate --seed
+    php artisan storage:link
+
+For XAMPP, open http://localhost/github/psychology-test. For normal Laravel hosting, point the document root to public/.
+
+DB_AUTO_MIGRATE=true may be used for local development. Disable it in production and run migrations deliberately.
+
+## Addon Development
+
+An addon lives in addons/{AddonName} and can contain:
+
+    addon.php
+    app/
+    routes/web.php
+    resources/views/
+    database/migrations/
+    public/
+
+Register the addon in config/addons.php. The manifest can provide admin_menu, permissions, dashboard_cards, web_editor.blocks, routes, views, and migrations.
+
+### Add a Web Editor Block
+
+A block definition returns its namespaced type, label, defaults, inspector fields, and renderer. The Demo example is:
+
+- Manifest: addons/Demo/addon.php
+- Definition: addons/Demo/app/PageBuilder/DemoPromoBlock.php
+- Type: demo.promo-card
+- Renderer: shared core addon-card renderer
+
+The manifest registration has this shape:
+
+    'web_editor' => [
+        'blocks' => [
+            [
+                'type' => 'demo.promo-card',
+                'permission' => 'demo.view',
+                'definition' => Addons\\Demo\\PageBuilder\\DemoPromoBlock::class,
+            ],
+        ],
+    ],
+
+Use a unique namespaced type such as billing.invoice-cta or church-events.upcoming-events. The definition defaults become initial block data, fields become inspector inputs, and the backend validates the same definition.
+
+### Addon Rules
+
+- Keep business logic inside the addon folder.
+- Use permission keys for every admin capability.
+- Use namespaced block types.
+- Validate all block data on the backend.
+- Add fallback output when an addon block is unavailable.
+- Add tenant_id to addon tables after multi-tenant NovaBase is implemented.
+- Add tests for registration, permission denial, validation, and public rendering.
+
+Detailed decisions are in docs/ADDON_WEB_EDITOR_ARCHITECTURE.md and MANAGEMENT_GEREJA.MD.

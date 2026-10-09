@@ -21,17 +21,7 @@
 
         <section class="sidebar-section">
             <div class="section-title">Add section</div>
-            <div class="block-palette">
-                <button class="palette-item" data-add-block="hero"><i class="bi bi-stars"></i> Hero</button>
-                <button class="palette-item" data-add-block="cards"><i class="bi bi-grid-3x3-gap"></i> Card Grid</button>
-                <button class="palette-item" data-add-block="split"><i class="bi bi-layout-split"></i> Image + Text</button>
-                <button class="palette-item" data-add-block="gallery"><i class="bi bi-images"></i> Gallery</button>
-                <button class="palette-item" data-add-block="video"><i class="bi bi-youtube"></i> Video</button>
-                <button class="palette-item" data-add-block="logos"><i class="bi bi-patch-check"></i> Logo List</button>
-                <button class="palette-item" data-add-block="testimonials"><i class="bi bi-chat-quote"></i> Testimonials</button>
-                <button class="palette-item" data-add-block="pricing"><i class="bi bi-tags"></i> Pricing</button>
-                <button class="palette-item" data-add-block="cta"><i class="bi bi-megaphone"></i> CTA</button>
-            </div>
+            <div id="blockPalette" class="block-palette"></div>
         </section>
 
         <section class="sidebar-section">

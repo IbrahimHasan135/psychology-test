@@ -1,4 +1,4 @@
-import { blockTypes } from './blockRegistry.js';
+import { blockTypes, blockDefinitions } from './blockRegistry.js';
 import { escapeHtml } from './siteRenderer.js';
 
 export function renderInspector(block) {
@@ -41,6 +41,8 @@ export function renderInspector(block) {
     ? block.data.plans.map((plan, index) => textField(block.id, `plans.${index}.link`, plan.link, `Plan ${index + 1} link`)).join('')
     : '';
 
+  const addonFields = renderDefinitionFields(block);
+
   const cardsControl = block.type === 'cards'
     ? `<button class="btn btn-outline-primary btn-sm w-100" data-inspector-action="add-card"><i class="bi bi-plus-lg"></i> Tambah Card</button>`
     : '';
@@ -78,6 +80,7 @@ export function renderInspector(block) {
     </div>
     <div class="inspector-card">
       ${navControl(block)}
+      ${addonFields}
       ${block.navEnabled ? rootTextField(block.id, 'navLabel', block.navLabel ?? block.data.title ?? block.type, 'Nama section di navbar') : ''}
       ${splitControl}
       ${splitControl ? '<hr>' : ''}
@@ -154,4 +157,17 @@ function navControl(block) {
       </button>
     </div>
   `;
+}
+
+function renderDefinitionFields(block) {
+  const fields = blockDefinitions[block.type]?.fields ?? [];
+  return fields.map((field) => {
+    const value = block.data[field.path] ?? "";
+    const label = escapeHtml(field.label || field.path);
+    const escaped = escapeHtml(value);
+    if (field.type === "textarea") {
+      return `<div class="mb-3"><label class="form-label">${label}</label><textarea class="form-control form-control-sm" data-text-field="${block.id}:${field.path}">${escaped}</textarea></div>`;
+    }
+    return `<div class="mb-3"><label class="form-label">${label}</label><input class="form-control form-control-sm" type="${field.type === "url" ? "url" : "text"}" value="${escaped}" data-text-field="${block.id}:${field.path}"></div>`;
+  }).join("");
 }

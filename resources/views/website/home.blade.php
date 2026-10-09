@@ -15,6 +15,7 @@
         <div id="publicSiteCanvas"></div>
         <script>
             window.NOVABASE_BUILDER_STATE = @json($builderState, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+            window.NOVABASE_BLOCK_DEFINITIONS = @json($blockDefinitions, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
             window.NOVABASE_DESIGN_TEMPLATES = @json($designTemplates, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
             window.NOVABASE_BASE_URL = @json(url('/'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
             window.NOVABASE_AUTH = @json($novabaseAuth, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);

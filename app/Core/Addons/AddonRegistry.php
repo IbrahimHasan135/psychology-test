@@ -94,6 +94,38 @@ class AddonRegistry
             ->values();
     }
 
+    public function pageBuilderDefinitions(?User $user = null): array
+    {
+        $definitions = [];
+
+        foreach ($this->enabled() as $addon) {
+            foreach ($addon->webEditorBlocks as $registration) {
+                $class = $registration["definition"] ?? null;
+                $permission = $registration["permission"] ?? null;
+
+                if (! is_string($class) || ! class_exists($class)) {
+                    continue;
+                }
+                if ($permission && $user && ! $user->hasPermission($permission)) {
+                    continue;
+                }
+
+                $definition = app($class)->definition();
+                $type = $definition["type"] ?? ($registration["type"] ?? null);
+                if (! is_string($type) || $type === "" || isset($definitions[$type])) {
+                    continue;
+                }
+
+                $definitions[$type] = array_merge($definition, [
+                    "addon" => $addon->slug,
+                    "permission" => $permission,
+                ]);
+            }
+        }
+
+        return $definitions;
+    }
+
     public function routeFiles(): Collection
     {
         return $this->enabled()

@@ -21,4 +21,13 @@ return [
     'dashboard_cards' => [
         DemoOverviewCard::class,
     ],
+    'web_editor' => [
+        'blocks' => [
+            [
+                'type' => 'demo.promo-card',
+                'permission' => 'demo.view',
+                'definition' => Addons\Demo\PageBuilder\DemoPromoBlock::class,
+            ],
+        ],
+    ],
 ];

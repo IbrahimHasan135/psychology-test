@@ -14,6 +14,7 @@ class AddonMeta
         public readonly array $adminMenu = [],
         public readonly array $permissions = [],
         public readonly array $dashboardCards = [],
+        public readonly array $webEditorBlocks = [],
         public readonly array $reports = [],
         public readonly array $listeners = [],
     ) {}
@@ -30,6 +31,7 @@ class AddonMeta
             adminMenu: $data['admin_menu'] ?? [],
             permissions: $data['permissions'] ?? [],
             dashboardCards: $data['dashboard_cards'] ?? [],
+            webEditorBlocks: $data['web_editor']['blocks'] ?? [],
             reports: $data['reports'] ?? [],
             listeners: $data['listeners'] ?? [],
         );

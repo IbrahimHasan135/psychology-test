@@ -290,3 +290,8 @@
 .template-earth .feature-icon {
   color: #d08c60;
 }
+
+.website-theme .addon-card-section { background: var(--site-hero); }
+.website-theme .addon-card-inner { max-width: 760px; margin: 0 auto; padding: 42px; border: 1px solid var(--site-border); border-radius: var(--site-radius); background: var(--site-surface); box-shadow: 0 18px 42px rgba(15, 23, 42, .08); }
+.website-theme .addon-card-badge { color: var(--site-accent); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px; }
+@media (max-width: 720px) { .website-theme .addon-card-inner { padding: 26px 20px; } }

@@ -123,6 +123,8 @@ function getSectionLabel(block) {
 }
 
 export function renderBlock(block, isEditable = false) {
+  const definition = window.NOVABASE_BLOCK_DEFINITIONS?.[block.type];
+  if (definition?.renderer === 'addon-card') return renderAddonCard(block, isEditable);
   if (block.type === 'hero') return renderHero(block, isEditable);
   if (block.type === 'cards') return renderCards(block, isEditable);
   if (block.type === 'split') return renderSplit(block, isEditable);
@@ -146,6 +148,20 @@ function editAttr(isEditable, block, path) {
 function hrefAttr(value) {
   const href = String(value || '#').trim() || '#';
   return `href="${escapeHtml(href)}"`;
+}
+
+function renderAddonCard(block, isEditable) {
+  const { data } = block;
+  return `
+    <div class="section-pad addon-card-section">
+      <div class="addon-card-inner">
+        <div class="addon-card-badge">${escapeHtml(data.badge)}</div>
+        <h2 class="section-heading" ${editAttr(isEditable, block, 'title')}>${escapeHtml(data.title)}</h2>
+        <p class="section-copy" ${editAttr(isEditable, block, 'text')}>${escapeHtml(data.text)}</p>
+        <a ${hrefAttr(data.buttonUrl)} class="btn btn-primary" ${editAttr(isEditable, block, 'buttonLabel')}>${escapeHtml(data.buttonLabel)} <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  `;
 }
 
 function renderHero(block, isEditable) {
