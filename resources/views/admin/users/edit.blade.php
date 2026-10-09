@@ -14,11 +14,11 @@
             <div class="notice error-notice admin-status">{{ $errors->first() }}</div>
         @endif
 
-        <form class="admin-card role-edit-card" method="POST" action="{{ route('admin.users.update', $editUser) }}">
+        <form class="admin-card role-edit-card" method="POST" action="{{ nova_route('admin.users.update', $editUser) }}">
             @csrf
             @method('PUT')
 
-            <a class="button button-soft" href="{{ route('admin.users.index') }}">Back</a>
+            <a class="button button-soft" href="{{ nova_route('admin.users.index') }}">Back</a>
             <p class="muted">Current role: <strong>{{ $editUser->role }}</strong></p>
 
             <label for="name">Full Name</label>

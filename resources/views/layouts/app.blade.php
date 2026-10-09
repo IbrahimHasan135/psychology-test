@@ -380,19 +380,19 @@
 <body class="{{ $isAdminArea ? 'admin-mode app-page' : '' }} {{ request()->routeIs('admin.pages.*') ? 'page-builder-mode' : '' }} {{ !empty($builderState) ? 'public-builder-mode' : '' }}">
 <div class="site-shell">
     <header class="topbar">
-        <a class="brand" href="{{ route('home') }}">
+        <a class="brand" href="{{ nova_route('home') }}">
             <span class="brand-mark">NB</span>
             <span>{{ config('app.name', 'NovaBase') }}</span>
         </a>
         <nav class="nav">
             @auth
-                <a href="{{ route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
-                <form method="POST" action="{{ route('logout') }}">
+                <a href="{{ nova_route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
+                <form method="POST" action="{{ nova_route('logout') }}">
                     @csrf
                     <button type="submit">Logout</button>
                 </form>
             @else
-                <a class="button-primary" href="{{ route('login') }}">Login</a>
+                <a class="button-primary" href="{{ nova_route('login') }}">Login</a>
             @endauth
         </nav>
     </header>

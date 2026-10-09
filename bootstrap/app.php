@@ -18,6 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
             'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
+            'resolve.tenant' => \App\Http\Middleware\ResolveTenant::class,
+            'tenant.member' => \App\Http\Middleware\EnsureTenantMembership::class,
+        ]);
+
+        $middleware->priority([
+            \App\Http\Middleware\ResolveTenant::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

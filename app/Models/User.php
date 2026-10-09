@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Core\Tenancy\TenantContext;
 
 class User extends Authenticatable
 {
@@ -54,7 +56,22 @@ class User extends Authenticatable
 
     public function hasRole(string ...$roles): bool
     {
-        return in_array($this->role, $roles, true);
+        return in_array($this->effectiveRole(), $roles, true);
+    }
+
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(TenantMembership::class);
+    }
+
+    public function effectiveRole(): string
+    {
+        return app(TenantContext::class)->roleFor($this) ?: (string) $this->role;
+    }
+
+    public function isPlatformSuperAdmin(): bool
+    {
+        return $this->role === UserRole::SUPER_ADMIN && ! app(TenantContext::class)->isScopedRequest();
     }
 
     public function roleRecord(): ?Role
@@ -63,12 +80,12 @@ class User extends Authenticatable
             return null;
         }
 
-        return Role::query()->where('slug', $this->role)->first();
+        return Role::query()->where('slug', $this->effectiveRole())->first();
     }
 
     public function isAdminLike(): bool
     {
-        if ($this->role === UserRole::SUPER_ADMIN) {
+        if ($this->effectiveRole() === UserRole::SUPER_ADMIN) {
             return true;
         }
 
@@ -82,12 +99,12 @@ class User extends Authenticatable
 
     public function canManageRoles(): bool
     {
-        return $this->role === UserRole::SUPER_ADMIN;
+        return $this->effectiveRole() === UserRole::SUPER_ADMIN;
     }
 
     public function canCreateRole(string $roleSlug): bool
     {
-        if ($this->role === UserRole::SUPER_ADMIN) {
+        if ($this->effectiveRole() === UserRole::SUPER_ADMIN) {
             return true;
         }
 
@@ -95,15 +112,22 @@ class User extends Authenticatable
             return false;
         }
 
-        return DB::table('role_creatable_roles')
-            ->where('role_slug', $this->role)
+        $query = DB::table('role_creatable_roles')
+            ->where('role_slug', $this->effectiveRole())
             ->where('creatable_role_slug', $roleSlug)
-            ->exists();
+            ;
+        if (app(TenantContext::class)->isScopedRequest()) {
+            $query->where(function ($builder): void {
+                $builder->whereNull('tenant_id')->orWhere('tenant_id', app(TenantContext::class)->id());
+            });
+        }
+
+        return $query->exists();
     }
 
     public function hasPermission(string $permission): bool
     {
-        if ($this->role === UserRole::SUPER_ADMIN) {
+        if ($this->isPlatformSuperAdmin()) {
             return true;
         }
 
@@ -111,16 +135,31 @@ class User extends Authenticatable
             return false;
         }
 
-        return DB::table('role_addon_permissions')
-            ->where('role', $this->role)
-            ->where('permission', $permission)
-            ->exists();
+        $query = DB::table('role_addon_permissions')
+            ->where('role', $this->effectiveRole())
+            ->where('permission', $permission);
+        if (app(TenantContext::class)->isScopedRequest()) {
+            $query->where(function ($builder): void {
+                $builder->whereNull('tenant_id')->orWhere('tenant_id', app(TenantContext::class)->id());
+            });
+        }
+
+        return $query->exists();
     }
 
     public function canAccessAddon(string $addonSlug): bool
     {
-        if ($this->role === UserRole::SUPER_ADMIN) {
+        if ($this->isPlatformSuperAdmin()) {
             return true;
+        }
+
+        $context = app(TenantContext::class);
+        if ($context->isScopedRequest()) {
+            return DB::table('tenant_addons')
+                ->where('tenant_id', $context->id())
+                ->where('addon_slug', $addonSlug)
+                ->where('status', 'active')
+                ->exists();
         }
 
         if (! Schema::hasTable('role_addon_permissions')) {
@@ -128,13 +167,17 @@ class User extends Authenticatable
         }
 
         return DB::table('role_addon_permissions')
-            ->where('role', $this->role)
+            ->where('role', $this->effectiveRole())
             ->where('addon_slug', $addonSlug)
             ->exists();
     }
 
     public function dashboardRoute(): string
     {
+        if (app(TenantContext::class)->isScopedRequest()) {
+            return $this->isAdminLike() ? 'admin.dashboard' : 'user.dashboard';
+        }
+
         return $this->isAdminLike() ? 'admin.dashboard' : 'user.dashboard';
     }
 }

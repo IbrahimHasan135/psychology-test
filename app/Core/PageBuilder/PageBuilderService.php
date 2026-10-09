@@ -5,6 +5,7 @@ namespace App\Core\PageBuilder;
 use App\Models\SitePage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Core\Tenancy\TenantContext;
 
 class PageBuilderService
 {
@@ -19,6 +20,9 @@ class PageBuilderService
         $pages = $pageQuery->get();
         $statePages = [];
         $template = 'template-studio';
+        $tenantPrefix = app(TenantContext::class)->isScopedRequest()
+            ? '/'.app(TenantContext::class)->tenant()->slug
+            : '';
 
         foreach ($pages as $page) {
             $pageState = $this->state($page);
@@ -26,7 +30,7 @@ class PageBuilderService
             $statePages[] = [
                 'id' => (string) $page->id,
                 'label' => $page->name,
-                'path' => $page->slug === 'home' ? '/' : '/'.$page->slug,
+                'path' => $page->slug === 'home' ? ($tenantPrefix ?: '/') : $tenantPrefix.'/'.$page->slug,
                 'blocks' => $pageState['blocks'],
             ];
         }

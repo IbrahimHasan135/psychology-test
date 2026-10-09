@@ -14,6 +14,9 @@
             <div class="eyebrow">NovaBase addon</div>
             <h2>Demo Addon</h2>
             <p>This page comes from the <code>demo::index</code> view namespace. If this addon appears, routes, views, sidebar, dashboard cards, and base permissions are connected.</p>
+            @if (auth()->user()?->isPlatformSuperAdmin())
+                <a class="button button-primary" href="{{ route('admin.addons.demo.tenants.index') }}">Manage Demo Tenants</a>
+            @endif
         </section>
     </main>
 </div>

@@ -35,7 +35,7 @@
 
     <main class="editor-main">
         <header class="topbar">
-            <a class="back-admin" href="{{ route('admin.dashboard') }}" aria-label="Admin Panel">
+            <a class="back-admin" href="{{ nova_route('admin.dashboard') }}" aria-label="Admin Panel">
                 <i class="bi bi-arrow-left"></i>
                 <span>Admin Panel</span>
             </a>
@@ -49,7 +49,7 @@
                     <button class="btn btn-light btn-sm active" data-viewport="desktop" title="Desktop preview"><i class="bi bi-display"></i></button>
                     <button class="btn btn-light btn-sm" data-viewport="mobile" title="Mobile preview"><i class="bi bi-phone"></i></button>
                 </div>
-                <button id="saveChangesBtn" class="btn btn-success btn-sm editor-save-button" data-url="{{ route('admin.pages.builder.site-save') }}" data-csrf="{{ csrf_token() }}"><i class="bi bi-cloud-check"></i> Save</button>
+                <button id="saveChangesBtn" class="btn btn-success btn-sm editor-save-button" data-url="{{ nova_route('admin.pages.builder.site-save') }}" data-csrf="{{ csrf_token() }}"><i class="bi bi-cloud-check"></i> Save</button>
             </div>
         </header>
 

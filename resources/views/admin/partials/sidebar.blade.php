@@ -20,14 +20,14 @@
 
     <nav class="sidebar-nav" id="sidebarNav">
             <div class="sidebar-group-label">Admin Panel</div>
-            <a class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}"><span>Dashboard</span></a>
+            <a class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ nova_route('admin.dashboard') }}"><span>Dashboard</span></a>
             @if (auth()->user()?->canManageRoles())
-                <a class="{{ request()->routeIs('admin.roles.*') ? 'active' : '' }}" href="{{ route('admin.roles.index') }}"><span>Role Management</span></a>
+                <a class="{{ request()->routeIs('admin.roles.*') ? 'active' : '' }}" href="{{ nova_route('admin.roles.index') }}"><span>Role Management</span></a>
             @endif
             @if (auth()->user()?->canManageUsers())
-                <a class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}"><span>User Management</span></a>
+                <a class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ nova_route('admin.users.index') }}"><span>User Management</span></a>
             @endif
-            <a class="{{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.sections.*') || request()->routeIs('admin.cards.*') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}"><span>Web Editor</span></a>
+            <a class="{{ request()->routeIs('admin.pages.*') || request()->routeIs('admin.sections.*') || request()->routeIs('admin.cards.*') ? 'active' : '' }}" href="{{ nova_route('admin.pages.index') }}"><span>Web Editor</span></a>
 
             @if ($addonMenu->isNotEmpty())
                 <div class="sidebar-group-label">Addons</div>
@@ -35,7 +35,7 @@
                     <details class="sidebar-addon" open>
                         <summary>{{ $group['addon']->name }}</summary>
                         @foreach ($group['items'] as $item)
-                            <a class="{{ request()->routeIs($item['route']) ? 'active' : '' }}" href="{{ route($item['route']) }}"><span>{{ $item['label'] }}</span></a>
+                            <a class="{{ request()->routeIs($item['route']) ? 'active' : '' }}" href="{{ nova_route($item['route']) }}"><span>{{ $item['label'] }}</span></a>
                         @endforeach
                     </details>
                 @endforeach
@@ -43,7 +43,7 @@
     </nav>
 
     <div class="sidebar-footer">
-        <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ nova_route('logout') }}">
             @csrf
             <button type="submit">Logout</button>
         </form>

@@ -6,11 +6,11 @@
         @php($novabaseAuth = auth()->check() ? [
             'authenticated' => true,
             'label' => auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal',
-            'url' => route(auth()->user()->dashboardRoute()),
+            'url' => nova_route(auth()->user()->dashboardRoute()),
         ] : [
             'authenticated' => false,
             'label' => 'Login',
-            'url' => route('login'),
+            'url' => nova_route('login'),
         ])
         <div id="publicSiteCanvas"></div>
         <script>
@@ -68,9 +68,9 @@
                 <p>A green Laravel foundation for modular products, admin panels, landing pages, addon features, roles, and future client deployments.</p>
                 <div class="hero-actions">
                     @auth
-                        <a class="button button-primary" href="{{ route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
+                        <a class="button button-primary" href="{{ nova_route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
                     @else
-                        <a class="button button-primary" href="{{ route('login') }}">Login</a>
+                        <a class="button button-primary" href="{{ nova_route('login') }}">Login</a>
                     @endauth
                 </div>
             </div>

@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\SitePage;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Tenant;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -66,14 +67,24 @@ class DatabaseSeeder extends Seeder
                 $user->password = $plainPassword;
             }
             $user->save();
+
+            $defaultTenant = Tenant::query()->where('slug', 'default')->first();
+            if ($defaultTenant) {
+                DB::table('tenant_memberships')->updateOrInsert(
+                    ['tenant_id' => $defaultTenant->id, 'user_id' => $user->id],
+                    ['role' => $user->role, 'status' => 'active', 'joined_at' => now(), 'updated_at' => now(), 'created_at' => now()]
+                );
+            }
         }
 
-        SitePage::query()->firstOrCreate(
-            ['slug' => 'home'],
+        $defaultTenant = Tenant::query()->where('slug', 'default')->first();
+        SitePage::query()->withoutGlobalScopes()->firstOrCreate(
+            ['tenant_id' => $defaultTenant?->id, 'slug' => 'home'],
             [
                 'name' => 'Home',
                 'display_mode' => 'sections',
                 'is_published' => true,
+                'tenant_id' => $defaultTenant?->id,
             ]
         );
 

@@ -6,6 +6,8 @@ use App\Core\Addons\AddonRegistry;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Core\Tenancy\TenantContext;
+use App\Enums\UserRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,8 +24,16 @@ class UserController extends Controller
         $currentUser = auth()->user();
         $roles = Role::query()->orderByDesc('is_system')->orderBy('name')->get();
 
+        $users = User::query();
+        $context = app(TenantContext::class);
+        if ($context->isScopedRequest()) {
+            $users->whereHas('memberships', fn ($query) => $query
+                ->where('tenant_id', $context->id())
+                ->where('status', 'active'));
+        }
+
         return view('admin.users.index', [
-            'users' => User::query()->latest()->paginate(10),
+            'users' => $users->latest()->paginate(10),
             'roles' => $roles,
             'creatableRoles' => $roles->filter(fn (Role $role) => $currentUser?->canCreateRole($role->slug)),
             'addonPermissions' => $addons->permissions()->groupBy('addon_name'),
@@ -45,9 +55,23 @@ class UserController extends Controller
             return back()->withErrors('You are not allowed to create accounts with that role.')->withInput();
         }
 
-        User::query()->create($data);
+        $role = $data['role'];
+        unset($data['role']);
+        $user = User::query()->create($data + [
+            'role' => app(TenantContext::class)->isScopedRequest() ? UserRole::USER : $role,
+        ]);
 
-        return redirect()->route('admin.users.index')->with('status', 'Account created.');
+        if (app(TenantContext::class)->isScopedRequest()) {
+            $user->memberships()->create([
+                'tenant_id' => app(TenantContext::class)->id(),
+                'role' => $role,
+                'status' => 'active',
+                'display_name' => $user->name,
+                'joined_at' => now(),
+            ]);
+        }
+
+        return redirect()->to(nova_route('admin.users.index'))->with('status', 'Account created.');
     }
 
     public function edit(User $user): View
@@ -76,7 +100,7 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('admin.users.index')->with('status', 'Account updated.');
+        return redirect()->to(nova_route('admin.users.index'))->with('status', 'Account updated.');
     }
 
     public function destroy(User $user): RedirectResponse
@@ -89,7 +113,7 @@ class UserController extends Controller
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')->with('status', 'Account deleted.');
+        return redirect()->to(nova_route('admin.users.index'))->with('status', 'Account deleted.');
     }
 
     private function canManageUser(User $user): bool
@@ -97,6 +121,14 @@ class UserController extends Controller
         $currentUser = auth()->user();
 
         if (! $currentUser?->canManageUsers()) {
+            return false;
+        }
+
+        $context = app(TenantContext::class);
+        if ($context->isScopedRequest() && ! $user->memberships()
+            ->where('tenant_id', $context->id())
+            ->where('status', 'active')
+            ->exists()) {
             return false;
         }
 

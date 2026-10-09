@@ -154,6 +154,32 @@ For XAMPP, open http://localhost/github/psychology-test. For normal Laravel host
 
 DB_AUTO_MIGRATE=true may be used for local development. Disable it in production and run migrations deliberately.
 
+## Optional Tenancy Mode
+
+NovaBase supports both single-product and multi-tenant products without changing the core code. In single mode, NovaBase uses an internal `default` tenant while keeping tenant details hidden from users.
+
+Keep tenancy disabled for a normal single-product installation:
+
+    NOVABASE_TENANCY_ENABLED=false
+    NOVABASE_TENANCY_DRIVER=single
+    NOVABASE_DEFAULT_TENANT_SLUG=default
+
+Enable path-based tenants when one installation serves multiple organizations:
+
+    NOVABASE_TENANCY_ENABLED=true
+    NOVABASE_TENANCY_DRIVER=path
+
+Tenant URLs then use database slugs, for example `/gbi`, `/gbi/login`, and `/gbi/admin`. The `/gbi` path is a dynamic Laravel route, not a physical folder or source-code directory. Creating a tenant only inserts database records.
+
+After changing tenancy configuration, clear cached configuration:
+
+    php artisan config:clear
+    php artisan cache:clear
+
+The Demo addon provides a platform-only tenant management screen at `Admin Panel > Demo Addon > Manage Demo Tenants`. The platform Super Admin can create and inspect tenants. A tenant owner uses the tenant URL and receives the tenant-scoped `super_admin` role; this is not the platform Super Admin and cannot see platform-only addon screens.
+
+The complete contract is documented in `docs/NOVABASE_TENANCY.md`.
+
 ## Addon Development
 
 An addon lives in addons/{AddonName} and can contain:

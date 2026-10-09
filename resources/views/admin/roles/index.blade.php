@@ -18,7 +18,7 @@
         @endif
 
         <section class="admin-grid">
-            <form class="admin-card form-card" method="POST" action="{{ route('admin.roles.store') }}">
+            <form class="admin-card form-card" method="POST" action="{{ nova_route('admin.roles.store') }}">
                 @csrf
                 <div class="admin-card-header">
                     <div>
@@ -111,8 +111,8 @@
                                     </td>
                                     <td data-label="Actions">
                                         <div class="action-group">
-                                        <a class="button button-soft button-sm" href="{{ route('admin.roles.edit', $role) }}">Edit</a>
-                                        <form method="POST" action="{{ route('admin.roles.destroy', $role) }}" class="inline-form" onsubmit="return confirm('Delete this role?')">
+                                        <a class="button button-soft button-sm" href="{{ nova_route('admin.roles.edit', $role) }}">Edit</a>
+                                        <form method="POST" action="{{ nova_route('admin.roles.destroy', $role) }}" class="inline-form" onsubmit="return confirm('Delete this role?')">
                                             @csrf
                                             @method('DELETE')
                                             <button class="button danger-button button-sm" type="submit">Delete</button>

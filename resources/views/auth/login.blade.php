@@ -7,7 +7,7 @@
         <h2>Login</h2>
         <p>Sign in to NovaBase to manage accounts, pages, and product addons.</p>
 
-        <form method="POST" action="{{ route('login.store') }}">
+        <form method="POST" action="{{ nova_route('login.store') }}">
             @csrf
             <label for="login">Username or Email</label>
             <input id="login" type="text" name="login" value="{{ old('login') }}" autocomplete="username" required autofocus>

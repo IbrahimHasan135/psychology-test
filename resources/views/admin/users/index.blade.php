@@ -18,7 +18,7 @@
         @endif
 
         <section class="admin-grid">
-            <form class="admin-card form-card" method="POST" action="{{ route('admin.users.store') }}">
+            <form class="admin-card form-card" method="POST" action="{{ nova_route('admin.users.store') }}">
                 @csrf
                 <div class="admin-card-header">
                     <div>
@@ -82,9 +82,9 @@
                                     <td data-label="Created">{{ $user->created_at?->format('d M Y H:i') }}</td>
                                     <td data-label="Actions">
                                         <div class="action-group">
-                                        <a class="button button-soft button-sm" href="{{ route('admin.users.edit', $user) }}">Edit</a>
+                                        <a class="button button-soft button-sm" href="{{ nova_route('admin.users.edit', $user) }}">Edit</a>
                                         @if (auth()->id() !== $user->id)
-                                            <form class="inline-form" method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Delete this account?')">
+                                            <form class="inline-form" method="POST" action="{{ nova_route('admin.users.destroy', $user) }}" onsubmit="return confirm('Delete this account?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button class="button danger-button button-sm" type="submit">Delete</button>

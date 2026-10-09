@@ -1,6 +1,8 @@
-# GerejaHub Management Architecture
+# NovaBase 2.0.0 Optional Tenancy Architecture
 
-Dokumen ini merancang implementasi NovaBase untuk produk GerejaHub. Dokumen ini adalah rancangan arsitektur dan belum mengubah kode aplikasi.
+Dokumen ini menjadi rancangan implementasi tenancy NovaBase yang dapat dipakai oleh GerejaHub maupun produk lain. Fondasi tenancy berada di NovaBase Core; fitur bisnis tetap berada di addon produk.
+
+Detail implementasi yang sudah aktif di codebase dirangkum di `docs/NOVABASE_TENANCY.md`. Dokumen ini tetap menjadi rancangan domain GerejaHub dan roadmap fitur produk.
 
 ## 1. Ringkasan Produk
 
@@ -638,4 +640,3 @@ Inti desainnya adalah memisahkan:
 - Permission: fitur apa yang boleh dia gunakan.
 
 Dengan pemisahan ini, GerejaHub dapat memiliki banyak gereja dalam satu aplikasi tanpa mencampur user, role, website, pembayaran, dan data operasional antar tenant.
-

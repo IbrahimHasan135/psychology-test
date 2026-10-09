@@ -3,7 +3,7 @@
     <div class="topbar-search">
         <input class="topbar-search-input" type="text" placeholder="Search workspace...">
     </div>
-    <a class="admin-web-link" href="{{ route('home') }}">
+    <a class="admin-web-link" href="{{ nova_route('home') }}">
         <span aria-hidden="true">↗</span>
         <span>View Website</span>
     </a>

@@ -10,21 +10,8 @@ use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\WebsiteController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [WebsiteController::class, 'home'])->name('home');
-
-Route::middleware('guest')->group(function (): void {
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-});
-
-Route::post('/logout', [LoginController::class, 'destroy'])
-    ->middleware('auth')
-    ->name('logout');
-
-Route::middleware(['auth', 'role:'.UserRole::SUPER_ADMIN.','.UserRole::ADMIN])
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function (): void {
+$adminRoutes = static function (string $prefix, string $namePrefix, array $middleware): void {
+    Route::middleware($middleware)->prefix($prefix)->name($namePrefix)->group(function (): void {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
@@ -44,24 +31,54 @@ Route::middleware(['auth', 'role:'.UserRole::SUPER_ADMIN.','.UserRole::ADMIN])
         Route::post('/cards/{card}/delete', [PageManagementController::class, 'destroyCard'])->name('cards.delete');
         Route::delete('/cards/{card}', [PageManagementController::class, 'destroyCard'])->name('cards.destroy');
     });
+};
 
-Route::middleware(['auth', 'role:'.UserRole::SUPER_ADMIN])
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function (): void {
+Route::get('/', [WebsiteController::class, 'home'])->middleware('resolve.tenant')->name('home');
+
+Route::middleware(['guest', 'resolve.tenant'])->group(function (): void {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+});
+
+Route::middleware(['guest', 'resolve.tenant'])->prefix('{tenant}')->name('tenant.')->group(function (): void {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+});
+
+Route::post('/logout', [LoginController::class, 'destroy'])
+    ->middleware(['auth', 'resolve.tenant'])
+    ->name('logout');
+Route::post('/{tenant}/logout', [LoginController::class, 'destroy'])
+    ->middleware(['auth', 'resolve.tenant'])
+    ->name('tenant.logout');
+
+$adminRoutes('admin', 'admin.', ['resolve.tenant', 'auth', 'tenant.member', 'role:'.UserRole::SUPER_ADMIN.','.UserRole::ADMIN]);
+$adminRoutes('{tenant}/admin', 'tenant.admin.', ['resolve.tenant', 'auth', 'tenant.member', 'role:'.UserRole::SUPER_ADMIN.','.UserRole::ADMIN]);
+
+$roleRoutes = static function (string $prefix, string $namePrefix, array $middleware): void {
+    Route::middleware($middleware)->prefix($prefix)->name($namePrefix)->group(function (): void {
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
         Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
         Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
         Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
     });
+};
 
-Route::middleware(['auth', 'role:'.UserRole::USER])
-    ->prefix('app')
-    ->name('user.')
-    ->group(function (): void {
-        Route::get('/dashboard', UserDashboardController::class)->name('dashboard');
-    });
+$roleRoutes('admin', 'admin.', ['resolve.tenant', 'auth', 'tenant.member', 'role:'.UserRole::SUPER_ADMIN]);
+$roleRoutes('{tenant}/admin', 'tenant.admin.', ['resolve.tenant', 'auth', 'tenant.member', 'role:'.UserRole::SUPER_ADMIN]);
+
+Route::middleware(['resolve.tenant', 'auth', 'tenant.member', 'role:'.UserRole::USER])
+    ->prefix('app')->name('user.')
+    ->group(fn (): mixed => Route::get('/dashboard', UserDashboardController::class)->name('dashboard'));
+Route::middleware(['resolve.tenant', 'auth', 'tenant.member', 'role:'.UserRole::USER])
+    ->prefix('{tenant}/app')->name('tenant.user.')
+    ->group(fn (): mixed => Route::get('/dashboard', UserDashboardController::class)->name('dashboard'));
+
+if (config('novabase.tenancy.enabled')) {
+    Route::get('/{tenant:slug}', [WebsiteController::class, 'home'])->middleware('resolve.tenant')->name('tenant.home');
+    Route::get('/{tenant:slug}/{page:slug}', [WebsiteController::class, 'page'])->middleware('resolve.tenant')->name('tenant.page');
+}
 
 Route::get('/{page:slug}', [WebsiteController::class, 'page'])
     ->where('page', '[A-Za-z0-9-]+')
