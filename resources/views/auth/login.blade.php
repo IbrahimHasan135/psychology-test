@@ -6,6 +6,9 @@
         <div class="eyebrow">Novalynk base access</div>
         <h2>Login</h2>
         <p>Sign in to NovaBase to manage accounts, pages, and product addons.</p>
+        @if (session('status'))
+            <div class="notice admin-status">{{ session('status') }}</div>
+        @endif
 
         <form method="POST" action="{{ nova_route('login.store') }}">
             @csrf

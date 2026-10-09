@@ -19,9 +19,9 @@ $adminRoutes = static function (string $prefix, string $namePrefix, array $middl
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::get('/pages', [PageManagementController::class, 'index'])->name('pages.index');
-        Route::put('/pages/builder-state', [PageManagementController::class, 'saveSiteBuilder'])->name('pages.builder.site-save');
+        Route::post('/pages/builder-state', [PageManagementController::class, 'saveSiteBuilder'])->name('pages.builder.site-save');
         Route::get('/pages/{page}/edit', [PageManagementController::class, 'edit'])->name('pages.edit');
-        Route::put('/pages/{page}/builder-state', [PageManagementController::class, 'saveBuilder'])->name('pages.builder.save');
+        Route::post('/pages/{page}/builder-state', [PageManagementController::class, 'saveBuilder'])->name('pages.builder.save');
         Route::put('/pages/{page}', [PageManagementController::class, 'update'])->name('pages.update');
         Route::post('/pages/{page}/sections', [PageManagementController::class, 'storeSection'])->name('pages.sections.store');
         Route::put('/sections/{section}', [PageManagementController::class, 'updateSection'])->name('sections.update');

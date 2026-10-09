@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Core\Tenancy\TenantContext;
+use App\Enums\UserRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +39,22 @@ class LoginController extends Controller
         }
 
         $context = app(TenantContext::class);
+        $ownedTenant = null;
+        if (! $context->isScopedRequest() && config('novabase.tenancy.enabled') && $user->role === UserRole::USER) {
+            $tenantMemberships = $user->memberships()
+                ->where('status', 'active')
+                ->whereHas('tenant', fn ($query) => $query->where('slug', '!=', config('novabase.tenancy.default_slug', 'default')));
+            $ownedTenant = (clone $tenantMemberships)
+                ->where('role', UserRole::SUPER_ADMIN)
+                ->with('tenant')
+                ->first()?->tenant;
+            if (! $ownedTenant && $tenantMemberships->exists()) {
+                throw ValidationException::withMessages([
+                    'login' => 'This account must use its tenant login page.',
+                ]);
+            }
+        }
+
         if ($context->isScopedRequest() && ! $user->memberships()
             ->where('tenant_id', $context->id())
             ->where('status', 'active')
@@ -49,6 +66,10 @@ class LoginController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
+
+        if ($ownedTenant) {
+            return redirect()->route('tenant.admin.dashboard', ['tenant' => $ownedTenant->slug]);
+        }
 
         return redirect()->intended(nova_route($request->user()->dashboardRoute()));
     }

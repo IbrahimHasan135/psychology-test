@@ -2,11 +2,17 @@
 
 @section('content')
 <main class="website-page">
+    @if ($errors->any())
+        <div class="page form-feedback form-feedback-error">{{ $errors->first() }}</div>
+    @endif
+    @if (session("status"))
+        <div class="page form-feedback form-feedback-success">{{ session("status") }}</div>
+    @endif
     @if (!empty($builderState))
         @php($novabaseAuth = auth()->check() ? [
             'authenticated' => true,
             'label' => auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal',
-            'url' => nova_route(auth()->user()->dashboardRoute()),
+            'url' => auth()->user()->dashboardUrl(),
         ] : [
             'authenticated' => false,
             'label' => 'Login',
@@ -19,8 +25,11 @@
             window.NOVABASE_DESIGN_TEMPLATES = @json($designTemplates, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
             window.NOVABASE_BASE_URL = @json(url('/'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
             window.NOVABASE_AUTH = @json($novabaseAuth, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+            window.NOVABASE_CSRF_TOKEN = @json(csrf_token());
+            window.NOVABASE_TENANT_SIGNUP_URL = @json(route('demo.tenant-accounts.store'));
         </script>
-        <script type="module" src="{{ asset('js/page-builder/editor/public-renderer.js') }}"></script>
+        @php($publicRendererScript = public_path('js/page-builder/editor/public-renderer.js'))
+        <script type="module" src="{{ asset('js/page-builder/editor/public-renderer.js') }}?v={{ is_file($publicRendererScript) ? filemtime($publicRendererScript) : time() }}"></script>
     @elseif ($page && $page->blocks->isNotEmpty())
         @if ($page->blocks->contains('nav_enabled', true))
             <nav class="{{ $page->display_mode === 'tabs' ? 'website-tabs' : 'nb-section-nav' }} page" aria-label="Website sections">
@@ -68,7 +77,7 @@
                 <p>A green Laravel foundation for modular products, admin panels, landing pages, addon features, roles, and future client deployments.</p>
                 <div class="hero-actions">
                     @auth
-                        <a class="button button-primary" href="{{ nova_route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
+                        <a class="button button-primary" href="{{ auth()->user()->dashboardUrl() }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
                     @else
                         <a class="button button-primary" href="{{ nova_route('login') }}">Login</a>
                     @endauth

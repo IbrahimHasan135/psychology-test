@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Core\Tenancy\TenantContext;
+use App\Models\Tenant;
 
 class User extends Authenticatable
 {
@@ -62,6 +63,35 @@ class User extends Authenticatable
     public function memberships(): HasMany
     {
         return $this->hasMany(TenantMembership::class);
+    }
+
+    public function ownedTenant(): ?Tenant
+    {
+        if (! Schema::hasTable('tenant_memberships')) {
+            return null;
+        }
+
+        return $this->memberships()
+            ->where('role', UserRole::SUPER_ADMIN)
+            ->where('status', 'active')
+            ->with('tenant')
+            ->get()
+            ->pluck('tenant')
+            ->filter()
+            ->first();
+    }
+
+    public function dashboardUrl(): string
+    {
+        $context = app(TenantContext::class);
+        if (! $context->isScopedRequest()) {
+            $tenant = $this->ownedTenant();
+            if ($tenant) {
+                return route('tenant.admin.dashboard', ['tenant' => $tenant->slug]);
+            }
+        }
+
+        return nova_route($this->dashboardRoute());
     }
 
     public function effectiveRole(): string

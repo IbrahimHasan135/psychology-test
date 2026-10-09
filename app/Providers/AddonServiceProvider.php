@@ -42,7 +42,7 @@ class AddonServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom($addons->migrationPaths());
 
         foreach ($addons->routeFiles() as $routeFile) {
-            Route::middleware(['web', 'auth'])
+            Route::middleware(['web'])
                 ->group($routeFile);
         }
     }

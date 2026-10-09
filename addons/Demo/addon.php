@@ -28,6 +28,11 @@ return [
                 'permission' => 'demo.view',
                 'definition' => Addons\Demo\PageBuilder\DemoPromoBlock::class,
             ],
+            [
+                'type' => 'demo.tenant-signup',
+                'permission' => 'demo.view',
+                'definition' => Addons\Demo\PageBuilder\TenantSignupBlock::class,
+            ],
         ],
     ],
 ];

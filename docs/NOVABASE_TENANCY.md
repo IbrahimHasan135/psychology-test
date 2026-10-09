@@ -86,6 +86,8 @@ The Demo addon demonstrates the initial provisioning flow:
 
 No `gbi` or `hkbp` directory is created.
 
+The Demo addon also registers a `Tenant Account Signup` Web Editor block. Its default migration places the card on the default Home page. The public card submits to the Demo addon provisioning endpoint, so a visitor can create the tenant without opening the platform admin panel. The signup flow uses the same transaction and owner membership rules as the platform form.
+
 ## Addon Entitlements
 
 An addon has two separate concerns:
@@ -130,5 +132,6 @@ The current foundation includes:
 - Tenant membership-aware user management.
 - Tenant addon entitlement checks.
 - Demo tenant creation and listing for platform Super Admin.
+- Public tenant signup card and owner login flow from the Demo addon.
 
 Future work should add tenant-scoped role records, tenant-aware uploads/cache, domain resolver support, suspension handling, invitations, and plan-based addon entitlements.

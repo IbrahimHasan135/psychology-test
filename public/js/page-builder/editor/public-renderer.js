@@ -17,6 +17,9 @@ function render() {
       button.setAttribute('aria-expanded', String(isOpen));
     });
   });
+  canvas.querySelectorAll('[data-editor-preview="true"]').forEach((form) => {
+    form.addEventListener('submit', (event) => event.preventDefault());
+  });
   canvas.querySelectorAll('[data-page-id]').forEach((item) => {
     item.addEventListener('click', (event) => {
       const targetPage = state.pages.find((page) => page.id === item.dataset.pageId);

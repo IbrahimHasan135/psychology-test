@@ -23,7 +23,8 @@
                     <label>Owner name<input name="owner_name" value="{{ old('owner_name') }}" required></label>
                     <label>Owner username<input name="owner_username" value="{{ old('owner_username') }}" required></label>
                     <label>Owner email<input type="email" name="owner_email" value="{{ old('owner_email') }}" required></label>
-                    <label>Owner password<input type="password" name="owner_password" required></label>
+                    <label>Owner password<input type="password" name="owner_password" minlength="8" required></label>
+                    <label>Confirm password<input type="password" name="owner_password_confirmation" minlength="8" required></label>
                     <div><button class="button button-primary" type="submit">Create Tenant Account</button></div>
                 </form>
             </div>
@@ -34,18 +35,19 @@
                 <h3>Registered Tenants</h3>
                 <div class="table-wrap">
                     <table class="admin-table">
-                        <thead><tr><th>Name</th><th>Slug</th><th>Owner</th><th>Status</th><th>Website</th></tr></thead>
+                        <thead><tr><th>Name</th><th>Slug</th><th>Owner account</th><th>Members</th><th>Status</th><th>Website</th></tr></thead>
                         <tbody>
                         @forelse ($tenants as $tenant)
                             <tr>
                                 <td>{{ $tenant->name }}</td>
                                 <td><code>{{ $tenant->slug }}</code></td>
-                                <td>{{ $tenant->owner?->email ?? 'Not assigned' }}</td>
+                                <td>{{ $tenant->owner?->username ?? 'Not assigned' }}<br><small>{{ $tenant->owner?->email }}</small></td>
+                                <td>{{ $tenant->memberships_count }}</td>
                                 <td>{{ ucfirst($tenant->status) }}</td>
                                 <td><a href="{{ url('/'.$tenant->slug) }}" target="_blank" rel="noreferrer">Open</a></td>
                             </tr>
                         @empty
-                            <tr><td colspan="5">No tenants registered yet.</td></tr>
+                            <tr><td colspan="6">No tenants registered yet.</td></tr>
                         @endforelse
                         </tbody>
                     </table>

@@ -77,7 +77,10 @@
     window.NOVABASE_BUILDER_STATE = @json($builderState, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
     window.NOVABASE_BLOCK_DEFINITIONS = @json($blockDefinitions, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
     window.NOVABASE_DESIGN_TEMPLATES = @json($designTemplates, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    window.NOVABASE_CSRF_TOKEN = @json(csrf_token());
+    window.NOVABASE_TENANT_SIGNUP_URL = @json(route('demo.tenant-accounts.store'));
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module" src="{{ asset('js/page-builder/editor/main.js') }}"></script>
+@php($editorScript = public_path('js/page-builder/editor/main.js'))
+<script type="module" src="{{ asset('js/page-builder/editor/main.js') }}?v={{ is_file($editorScript) ? filemtime($editorScript) : time() }}"></script>
 @endsection

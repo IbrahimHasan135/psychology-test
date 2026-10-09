@@ -71,6 +71,9 @@
         .button-primary:hover { background: var(--green-700); }
         .button-soft { background: #e7f7ec; color: var(--green-900); border-color: #cfe9d7; }
         .page { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+        .form-feedback { margin-top: 18px; padding: 13px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; }
+        .form-feedback-error { color: #8b1e1e; background: #fff0f0; border: 1px solid #f1c2c2; }
+        .form-feedback-success { color: var(--green-900); background: var(--mint); border: 1px solid #cfe9d7; }
         .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 500px); gap: clamp(28px, 5vw, 76px); align-items: center; padding: clamp(48px, 8vw, 94px) 0 42px; }
         .eyebrow { color: var(--green-700); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0; }
         h1, h2, h3, p { margin-top: 0; }
@@ -386,7 +389,7 @@
         </a>
         <nav class="nav">
             @auth
-                <a href="{{ nova_route(auth()->user()->dashboardRoute()) }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
+                <a href="{{ auth()->user()->dashboardUrl() }}">{{ auth()->user()->isAdminLike() ? 'Admin Panel' : 'User Portal' }}</a>
                 <form method="POST" action="{{ nova_route('logout') }}">
                     @csrf
                     <button type="submit">Logout</button>

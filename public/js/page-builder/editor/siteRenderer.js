@@ -124,6 +124,7 @@ function getSectionLabel(block) {
 
 export function renderBlock(block, isEditable = false) {
   const definition = window.NOVABASE_BLOCK_DEFINITIONS?.[block.type];
+  if (definition?.renderer === 'tenant-signup') return renderTenantSignup(block, isEditable);
   if (definition?.renderer === 'addon-card') return renderAddonCard(block, isEditable);
   if (block.type === 'hero') return renderHero(block, isEditable);
   if (block.type === 'cards') return renderCards(block, isEditable);
@@ -159,6 +160,37 @@ function renderAddonCard(block, isEditable) {
         <h2 class="section-heading" ${editAttr(isEditable, block, 'title')}>${escapeHtml(data.title)}</h2>
         <p class="section-copy" ${editAttr(isEditable, block, 'text')}>${escapeHtml(data.text)}</p>
         <a ${hrefAttr(data.buttonUrl)} class="btn btn-primary" ${editAttr(isEditable, block, 'buttonLabel')}>${escapeHtml(data.buttonLabel)} <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  `;
+}
+
+function renderTenantSignup(block, isEditable) {
+  const { data } = block;
+  const action = window.NOVABASE_TENANT_SIGNUP_URL || '#';
+  const previewAttributes = isEditable ? 'onsubmit="return false" data-editor-preview="true"' : '';
+
+  return `
+    <div class="section-pad tenant-signup-section">
+      <div class="tenant-signup-card">
+        <div class="tenant-signup-copy">
+          <div class="addon-card-badge" ${editAttr(isEditable, block, 'badge')}>${escapeHtml(data.badge)}</div>
+          <h2 class="section-heading" ${editAttr(isEditable, block, 'title')}>${escapeHtml(data.title)}</h2>
+          <p class="section-copy" ${editAttr(isEditable, block, 'text')}>${escapeHtml(data.text)}</p>
+          <div class="tenant-signup-note"><i class="bi bi-link-45deg"></i> Your website will be available at <strong>/your-slug</strong>.</div>
+          ${isEditable ? '<div class="tenant-signup-editor-note"><i class="bi bi-eye"></i> Editor preview only. The live website will accept registrations.</div>' : ''}
+        </div>
+        <form class="tenant-signup-form" method="POST" action="${escapeHtml(action)}" ${previewAttributes}>
+          <input type="hidden" name="_token" value="${escapeHtml(window.NOVABASE_CSRF_TOKEN || '')}">
+          <label>Workspace name<input name="tenant_name" placeholder="My organization" required ${isEditable ? 'disabled' : ''}></label>
+          <label>Workspace URL<input name="tenant_slug" placeholder="my-organization" pattern="[A-Za-z0-9_-]+" required ${isEditable ? 'disabled' : ''}></label>
+          <label>Owner name<input name="owner_name" placeholder="Your full name" required ${isEditable ? 'disabled' : ''}></label>
+          <label>Username<input name="owner_username" placeholder="your.username" pattern="[A-Za-z0-9._-]+" required ${isEditable ? 'disabled' : ''}></label>
+          <label>Email<input type="email" name="owner_email" placeholder="you@example.com" required ${isEditable ? 'disabled' : ''}></label>
+          <label>Password<input type="password" name="owner_password" minlength="8" required ${isEditable ? 'disabled' : ''}></label>
+          <label>Confirm password<input type="password" name="owner_password_confirmation" minlength="8" required ${isEditable ? 'disabled' : ''}></label>
+          <button class="btn btn-primary" type="submit" ${isEditable ? 'disabled' : ''}>Create account <i class="bi bi-arrow-right"></i></button>
+        </form>
       </div>
     </div>
   `;

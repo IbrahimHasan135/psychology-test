@@ -47,7 +47,7 @@ class PageManagementController extends Controller
             'pages' => ['required', 'array', 'min:1', 'max:30'],
             'pages.*.id' => ['required', 'string', 'alpha_dash', 'max:80'],
             'pages.*.label' => ['required', 'string', 'max:120'],
-            'pages.*.path' => ['required', 'string', 'max:121', 'regex:/^\/(?:[A-Za-z0-9][A-Za-z0-9-]*)?$/', 'distinct'],
+            'pages.*.path' => ['required', 'string', 'max:180', 'regex:/^\/(?:[A-Za-z0-9][A-Za-z0-9-]*(?:\/[A-Za-z0-9][A-Za-z0-9-]*)?)?\/?$/', 'distinct'],
             'pages.*.blocks' => ['present', 'array', 'max:100'],
             'pages.*.blocks.*.id' => ['required', 'string', 'alpha_dash', 'max:80', 'distinct'],
             'pages.*.blocks.*.type' => ['required', Rule::in(array_keys($registry->definitions($request->user())))],

@@ -180,6 +180,9 @@ The Demo addon provides a platform-only tenant management screen at `Admin Panel
 
 The complete contract is documented in `docs/NOVABASE_TENANCY.md`.
 
+The Web Editor save endpoint uses `POST` instead of `PUT` so it works through Apache/XAMPP and shared hosting configurations that reject PUT requests before Laravel receives them.
+The editor script URL includes a file version so browsers do not keep using an older cached `PUT` implementation after an update.
+
 ## Addon Development
 
 An addon lives in addons/{AddonName} and can contain:

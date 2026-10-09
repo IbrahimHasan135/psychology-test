@@ -100,7 +100,7 @@ class PageBuilderService
                     : null;
                 $page ??= new SitePage();
 
-                $slug = trim($pageState['path'], '/');
+                $slug = $this->normalizePageSlug($pageState['path']);
                 $page->fill([
                     'name' => $pageState['label'],
                     'slug' => $slug === '' ? 'home' : $slug,
@@ -130,6 +130,19 @@ class PageBuilderService
         $activePage = SitePage::query()->findOrFail($activeId);
 
         return $this->editorState($activePage);
+    }
+
+    private function normalizePageSlug(string $path): string
+    {
+        $slug = trim($path, '/');
+        $context = app(TenantContext::class);
+        $tenantSlug = $context->isScopedRequest() ? $context->tenant()?->slug : null;
+
+        if ($tenantSlug && ($slug === $tenantSlug || str_starts_with($slug, $tenantSlug.'/'))) {
+            $slug = ltrim(substr($slug, strlen($tenantSlug)), '/');
+        }
+
+        return $slug === '' ? 'home' : $slug;
     }
 
     private function importLegacyContent(SitePage $page): void

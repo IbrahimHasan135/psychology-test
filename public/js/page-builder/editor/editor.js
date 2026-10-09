@@ -283,7 +283,7 @@ export class VisualEditor {
     this.saving = true;
     try {
       const response = await fetch(this.nodes.saveBtn.dataset.url, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
