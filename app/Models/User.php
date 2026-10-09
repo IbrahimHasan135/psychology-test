@@ -21,6 +21,12 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
+    /** @var array<string, bool> */
+    private array $permissionCache = [];
+
+    /** @var array<string, bool> */
+    private array $addonAccessCache = [];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -72,16 +78,7 @@ class User extends Authenticatable
 
     public function currentMembership(): ?TenantMembership
     {
-        $context = app(TenantContext::class);
-        if (! $context->isScopedRequest()) {
-            return null;
-        }
-
-        return $this->memberships()
-            ->where('tenant_id', $context->id())
-            ->where('status', 'active')
-            ->with('roleDefinition')
-            ->first();
+        return app(TenantContext::class)->membershipFor($this);
     }
 
     public function ownedTenant(): ?Tenant
@@ -94,10 +91,7 @@ class User extends Authenticatable
             ->where('role', UserRole::SUPER_ADMIN)
             ->where('status', 'active')
             ->with('tenant')
-            ->get()
-            ->pluck('tenant')
-            ->filter()
-            ->first();
+            ->first()?->tenant;
     }
 
     public function dashboardUrl(): string
@@ -124,11 +118,7 @@ class User extends Authenticatable
             return true;
         }
 
-        return $context->isActiveSession()
-            && $this->memberships()
-                ->where('tenant_id', $context->id())
-                ->where('status', 'active')
-                ->exists();
+        return $context->isActiveSession() && $this->currentMembership() !== null;
     }
 
     public function effectiveRole(): string
@@ -200,17 +190,23 @@ class User extends Authenticatable
 
         $addonSlug = str($permission)->before('.')->toString();
         $addon = app(AddonRegistry::class)->find($addonSlug);
-        if ($addon?->scope === 'platform' && app(TenantContext::class)->isScopedRequest()) {
+        $context = app(TenantContext::class);
+        if ($addon?->scope === 'platform' && $context->isScopedRequest()) {
             return false;
+        }
+
+        $cacheKey = ($context->id() ?? 0).':'.$permission.':'.$this->effectiveRole();
+        if (array_key_exists($cacheKey, $this->permissionCache)) {
+            return $this->permissionCache[$cacheKey];
         }
 
         if (! Schema::hasTable('role_addon_permissions')) {
-            return false;
+            return $this->permissionCache[$cacheKey] = false;
         }
 
-        if (app(TenantContext::class)->isScopedRequest() && $this->effectiveRole() === UserRole::SUPER_ADMIN) {
-            return DB::table('tenant_addons')
-                ->where('tenant_id', app(TenantContext::class)->id())
+        if ($context->isScopedRequest() && $this->effectiveRole() === UserRole::SUPER_ADMIN) {
+            return $this->permissionCache[$cacheKey] = DB::table('tenant_addons')
+                ->where('tenant_id', $context->id())
                 ->where('addon_slug', $addonSlug)
                 ->where('status', 'active')
                 ->exists();
@@ -223,29 +219,34 @@ class User extends Authenticatable
             ->where(function ($query) use ($roleId): void {
                 $query->where('role_id', $roleId)->orWhere('role', $this->effectiveRole());
             });
-        if (app(TenantContext::class)->isScopedRequest()) {
+        if ($context->isScopedRequest()) {
             $query->where(function ($builder): void {
                 $builder->whereNull('tenant_id')->orWhere('tenant_id', app(TenantContext::class)->id());
             });
         }
 
-        return $query->exists();
+        return $this->permissionCache[$cacheKey] = $query->exists();
     }
 
     public function canAccessAddon(string $addonSlug): bool
     {
         $addon = app(AddonRegistry::class)->find($addonSlug);
-        if ($addon?->scope === 'platform' && app(TenantContext::class)->isScopedRequest()) {
+        $context = app(TenantContext::class);
+        if ($addon?->scope === 'platform' && $context->isScopedRequest()) {
             return false;
         }
 
-        if ($this->isPlatformSuperAdmin()) {
-            return true;
+        $cacheKey = ($context->id() ?? 0).':'.$addonSlug.':'.$this->effectiveRole();
+        if (array_key_exists($cacheKey, $this->addonAccessCache)) {
+            return $this->addonAccessCache[$cacheKey];
         }
 
-        $context = app(TenantContext::class);
+        if ($this->isPlatformSuperAdmin()) {
+            return $this->addonAccessCache[$cacheKey] = true;
+        }
+
         if ($context->isScopedRequest()) {
-            return DB::table('tenant_addons')
+            return $this->addonAccessCache[$cacheKey] = DB::table('tenant_addons')
                 ->where('tenant_id', $context->id())
                 ->where('addon_slug', $addonSlug)
                 ->where('status', 'active')
@@ -253,10 +254,10 @@ class User extends Authenticatable
         }
 
         if (! Schema::hasTable('role_addon_permissions')) {
-            return false;
+            return $this->addonAccessCache[$cacheKey] = false;
         }
 
-        return DB::table('role_addon_permissions')
+        return $this->addonAccessCache[$cacheKey] = DB::table('role_addon_permissions')
             ->where('role', $this->effectiveRole())
             ->where('addon_slug', $addonSlug)
             ->exists();

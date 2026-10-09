@@ -17,7 +17,7 @@ use App\Support\Audit;
 
 class UserController extends Controller
 {
-    public function index(AddonRegistry $addons): View
+    public function index(Request $request, AddonRegistry $addons): View
     {
         $permissionQuery = DB::table('role_addon_permissions');
         $context = app(TenantContext::class);
@@ -32,14 +32,28 @@ class UserController extends Controller
         $roles = Role::query()->orderByDesc('is_system')->orderBy('name')->get();
 
         $users = User::query();
+        $search = trim((string) $request->string('search'));
+        if ($search !== '') {
+            $prefix = $search.'%';
+            $users->where(function ($query) use ($prefix): void {
+                $query->where('name', 'like', $prefix)
+                    ->orWhere('username', 'like', $prefix)
+                    ->orWhere('email', 'like', $prefix);
+            });
+        }
         if ($context->isScopedRequest()) {
             $users->whereHas('memberships', fn ($query) => $query
                 ->where('tenant_id', $context->id())
                 ->where('status', 'active'));
+            $users->with(['memberships' => fn ($query) => $query
+                ->where('tenant_id', $context->id())
+                ->where('status', 'active')
+                ->with('roleDefinition')]);
         }
 
         return view('admin.users.index', [
-            'users' => $users->orderByDesc('id')->cursorPaginate(50),
+            'users' => $users->orderByDesc('id')->cursorPaginate(50)->withQueryString(),
+            'search' => $search,
             'roles' => $roles,
             'creatableRoles' => $roles->filter(fn (Role $role) => $currentUser?->canCreateRole($role->slug)),
             'addonPermissions' => $addons->permissions()->groupBy('addon_name'),

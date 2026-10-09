@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\UserRole;
 use App\Models\SitePage;
 use App\Models\User;
+use App\Core\PageBuilder\BlockRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -110,5 +111,38 @@ class PageManagementTest extends TestCase
 
         $this->assertDatabaseMissing('site_sections', ['id' => $section->id]);
         $this->assertDatabaseMissing('site_cards', ['id' => $card->id]);
+    }
+
+    public function test_stale_editor_save_is_rejected(): void
+    {
+        $this->seed();
+        $admin = User::factory()->create(['role' => UserRole::ADMIN]);
+        $page = SitePage::query()->where('slug', 'home')->firstOrFail();
+        $payload = [
+            'template' => 'template-studio',
+            'activePageId' => (string) $page->id,
+            'pages' => [[
+                'id' => (string) $page->id,
+                'label' => 'Home',
+                'path' => '/',
+                'version' => 1,
+                'blocks' => [[
+                    'id' => 'home-hero',
+                    'type' => 'hero',
+                    'navEnabled' => true,
+                    'navLabel' => 'Home',
+                    'data' => BlockRegistry::definitions()['hero']['initial'],
+                ]],
+            ]],
+        ];
+
+        $this->actingAs($admin)
+            ->postJson(route('admin.pages.builder.site-save'), $payload)
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->postJson(route('admin.pages.builder.site-save'), $payload)
+            ->assertStatus(409)
+            ->assertJsonFragment(['message' => 'This page was changed by another administrator. Reload before saving.']);
     }
 }

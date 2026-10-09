@@ -113,6 +113,8 @@ The admin panel includes `Web Editor` for managing the Home page. Display mode c
 
 Detailed architecture notes are in `docs/ARCHITECTURE.md`.
 
+Production topology, Redis, queue workers, backup, and scale guidance are in `docs/NOVABASE_2_0_0_DEPLOYMENT.md`.
+
 ## Exact Runtime Requirements
 
 This repository currently targets:

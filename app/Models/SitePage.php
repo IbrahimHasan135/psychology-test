@@ -19,6 +19,7 @@ class SitePage extends Model
         'display_mode',
         'is_published',
         'builder_initialized',
+        'builder_version',
         'template_id',
         'tenant_id',
     ];
@@ -28,6 +29,7 @@ class SitePage extends Model
         return [
             'is_published' => 'boolean',
             'builder_initialized' => 'boolean',
+            'builder_version' => 'integer',
         ];
     }
 

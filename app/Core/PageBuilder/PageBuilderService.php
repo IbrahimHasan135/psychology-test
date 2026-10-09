@@ -5,15 +5,29 @@ namespace App\Core\PageBuilder;
 use App\Models\SitePage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Core\Tenancy\TenantContext;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class PageBuilderService
 {
     public function editorState(SitePage $activePage, bool $public = false): array
     {
+        if ($public) {
+            $cacheKey = 'novabase:public-builder-state:'.($activePage->tenant_id ?? 0).':'.$activePage->id.':'.($activePage->updated_at?->getTimestamp() ?? 0);
+
+            return Cache::remember($cacheKey, now()->addMinutes(5), fn (): array => $this->buildEditorState($activePage, true));
+        }
+
+        return $this->buildEditorState($activePage, false);
+    }
+
+    private function buildEditorState(SitePage $activePage, bool $public): array
+    {
         $pageQuery = SitePage::query()
             ->orderByRaw('CASE WHEN slug = ? THEN 0 ELSE 1 END', ['home'])
-            ->orderBy('id');
+            ->orderBy('id')
+            ->with('blocks');
         if ($public) {
             $pageQuery->where('is_published', true);
         }
@@ -32,6 +46,7 @@ class PageBuilderService
                 'label' => $page->name,
                 'path' => $page->slug === 'home' ? ($tenantPrefix ?: '/') : $tenantPrefix.'/'.$page->slug,
                 'blocks' => $pageState['blocks'],
+                'version' => $pageState['page']['builderVersion'],
             ];
         }
 
@@ -58,8 +73,8 @@ class PageBuilderService
         }
 
         return [
-            'page' => ['id' => $page->id, 'name' => $page->name, 'slug' => $page->slug, 'displayMode' => $page->display_mode, 'published' => $page->is_published],
-            'blocks' => $page->blocks()->orderBy('sort_order')->orderBy('id')->get()->map(fn ($block) => [
+            'page' => ['id' => $page->id, 'name' => $page->name, 'slug' => $page->slug, 'displayMode' => $page->display_mode, 'published' => $page->is_published, 'builderVersion' => $page->builder_version ?: 1],
+            'blocks' => $page->loadMissing('blocks')->blocks->map(fn ($block) => [
                 'id' => $block->block_uid,
                 'type' => $block->type,
                 'navEnabled' => $block->nav_enabled,
@@ -72,11 +87,14 @@ class PageBuilderService
     public function save(SitePage $page, array $state): void
     {
         DB::transaction(function () use ($page, $state): void {
+            $page = SitePage::query()->lockForUpdate()->findOrFail($page->id);
+            $this->assertVersion($page, $state['page']['builderVersion'] ?? null);
             $page->update([
                 'name' => $state['page']['name'],
                 'display_mode' => $state['page']['displayMode'],
                 'is_published' => $state['page']['published'],
                 'builder_initialized' => true,
+                'builder_version' => ($page->builder_version ?: 1) + 1,
             ]);
 
             $page->blocks()->delete();
@@ -96,9 +114,11 @@ class PageBuilderService
         DB::transaction(function () use ($state, &$idMap): void {
             foreach ($state['pages'] as $pageState) {
                 $page = is_numeric($pageState['id'])
-                    ? SitePage::query()->find($pageState['id'])
+                    ? SitePage::query()->lockForUpdate()->find($pageState['id'])
                     : null;
                 $page ??= new SitePage();
+
+                $this->assertVersion($page, $pageState['version'] ?? null);
 
                 $slug = $this->normalizePageSlug($pageState['path']);
                 $page->fill([
@@ -107,6 +127,7 @@ class PageBuilderService
                     'display_mode' => $page->display_mode ?: 'sections',
                     'is_published' => $page->exists ? $page->is_published : true,
                     'builder_initialized' => true,
+                    'builder_version' => $page->exists ? (($page->builder_version ?: 1) + 1) : 1,
                     'template_id' => $state['template'],
                 ]);
                 $page->save();
@@ -130,6 +151,13 @@ class PageBuilderService
         $activePage = SitePage::query()->findOrFail($activeId);
 
         return $this->editorState($activePage);
+    }
+
+    private function assertVersion(SitePage $page, mixed $expectedVersion): void
+    {
+        if ($page->exists && $expectedVersion !== null && (int) $expectedVersion !== (int) ($page->builder_version ?: 1)) {
+            throw new ConflictHttpException('This page was changed by another administrator. Reload before saving.');
+        }
     }
 
     private function normalizePageSlug(string $path): string

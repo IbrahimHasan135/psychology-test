@@ -60,6 +60,14 @@
                     </div>
                     <span class="pill">{{ $users->count() }} accounts shown</span>
                 </div>
+                <form class="table-toolbar" method="GET" action="{{ nova_route('admin.users.index') }}">
+                    <label class="sr-only" for="user-search">Search accounts</label>
+                    <input id="user-search" name="search" value="{{ $search }}" placeholder="Search by name, username, or email">
+                    <button class="button button-soft button-sm" type="submit">Search</button>
+                    @if ($search !== '')
+                        <a class="button button-soft button-sm" href="{{ nova_route('admin.users.index') }}">Clear</a>
+                    @endif
+                </form>
                 <div class="table-wrap embedded-table">
                     <table class="admin-table">
                         <thead>
@@ -78,7 +86,8 @@
                                     <td data-label="Name">{{ $user->name }}</td>
                                     <td data-label="Username">{{ $user->username ?? '-' }}</td>
                                     <td data-label="Email">{{ $user->email }}</td>
-                                    <td data-label="Role"><span class="pill">{{ \App\Enums\UserRole::label($user->role) }}</span></td>
+                                    @php($membershipRole = $user->memberships->first()?->roleDefinition?->name)
+                                    <td data-label="Role"><span class="pill">{{ $membershipRole ?: \App\Enums\UserRole::label($user->role) }}</span></td>
                                     <td data-label="Created">{{ $user->created_at?->format('d M Y H:i') }}</td>
                                     <td data-label="Actions">
                                         <div class="action-group">
