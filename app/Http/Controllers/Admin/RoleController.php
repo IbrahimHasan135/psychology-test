@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Core\Tenancy\TenantContext;
+use App\Support\Audit;
 
 class RoleController extends Controller
 {
@@ -120,6 +121,7 @@ class RoleController extends Controller
         foreach ($permissions as $permission) {
             DB::table('role_addon_permissions')->insert([
                 'role' => $role->slug,
+                'role_id' => $role->id,
                 'tenant_id' => $tenantId,
                 'addon_slug' => Str::before($permission, '.'),
                 'permission' => $permission,
@@ -127,6 +129,8 @@ class RoleController extends Controller
                 'updated_at' => now(),
             ]);
         }
+
+        Audit::record('role.access_updated', $role, ['permissions' => $permissions->all()]);
 
         DB::table('role_creatable_roles')->where('role_slug', $role->slug)->where('tenant_id', $tenantId)->delete();
         foreach (collect($request->input('creatable_roles', []))->unique() as $creatableRole) {

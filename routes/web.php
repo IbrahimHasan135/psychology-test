@@ -37,12 +37,12 @@ Route::get('/', [WebsiteController::class, 'home'])->middleware('resolve.tenant'
 
 Route::middleware(['resolve.tenant'])->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:login')->name('login.store');
 });
 
 Route::middleware(['resolve.tenant'])->prefix('{tenant}')->name('tenant.')->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:login')->name('login.store');
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])

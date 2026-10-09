@@ -5,6 +5,8 @@ namespace Addons\Demo\Services;
 use App\Models\SitePage;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Role;
+use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 
 class TenantProvisioner
@@ -31,6 +33,7 @@ class TenantProvisioner
             $tenant->memberships()->create([
                 'user_id' => $owner->id,
                 'role' => 'super_admin',
+                'role_id' => Role::query()->where('slug', 'super_admin')->value('id'),
                 'status' => 'active',
                 'display_name' => $owner->name,
                 'joined_at' => now(),
@@ -43,6 +46,8 @@ class TenantProvisioner
                 'display_mode' => 'sections',
                 'is_published' => true,
             ]);
+
+            Audit::record('tenant.created', $tenant, ['owner_user_id' => $owner->id]);
 
             return $tenant;
         });

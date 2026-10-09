@@ -70,9 +70,10 @@ class DatabaseSeeder extends Seeder
 
             $defaultTenant = Tenant::query()->where('slug', 'default')->first();
             if ($defaultTenant) {
+                $roleId = Role::query()->where('slug', $user->role)->value('id');
                 DB::table('tenant_memberships')->updateOrInsert(
                     ['tenant_id' => $defaultTenant->id, 'user_id' => $user->id],
-                    ['role' => $user->role, 'status' => 'active', 'joined_at' => now(), 'updated_at' => now(), 'created_at' => now()]
+                    ['role' => $user->role, 'role_id' => $roleId, 'status' => 'active', 'joined_at' => now(), 'updated_at' => now(), 'created_at' => now()]
                 );
             }
         }
@@ -95,6 +96,7 @@ class DatabaseSeeder extends Seeder
                 foreach ($permissions as $permission) {
                     $attributes = [
                         'role' => $role,
+                        'role_id' => Role::query()->where('slug', $role)->value('id'),
                         'addon_slug' => str($permission)->before('.')->toString(),
                         'permission' => $permission,
                     ];

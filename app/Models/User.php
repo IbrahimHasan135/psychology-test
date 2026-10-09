@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Core\Tenancy\TenantContext;
 use App\Core\Addons\AddonRegistry;
 use App\Models\Tenant;
@@ -18,7 +19,7 @@ use App\Models\Tenant;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -30,6 +31,8 @@ class User extends Authenticatable
         'username',
         'email',
         'role',
+        'status',
+        'last_login_at',
         'password',
     ];
 
@@ -52,6 +55,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -64,6 +68,20 @@ class User extends Authenticatable
     public function memberships(): HasMany
     {
         return $this->hasMany(TenantMembership::class);
+    }
+
+    public function currentMembership(): ?TenantMembership
+    {
+        $context = app(TenantContext::class);
+        if (! $context->isScopedRequest()) {
+            return null;
+        }
+
+        return $this->memberships()
+            ->where('tenant_id', $context->id())
+            ->where('status', 'active')
+            ->with('roleDefinition')
+            ->first();
     }
 
     public function ownedTenant(): ?Tenant
@@ -198,9 +216,13 @@ class User extends Authenticatable
                 ->exists();
         }
 
+        $roleId = $this->currentMembership()?->role_id;
+
         $query = DB::table('role_addon_permissions')
-            ->where('role', $this->effectiveRole())
-            ->where('permission', $permission);
+            ->where('permission', $permission)
+            ->where(function ($query) use ($roleId): void {
+                $query->where('role_id', $roleId)->orWhere('role', $this->effectiveRole());
+            });
         if (app(TenantContext::class)->isScopedRequest()) {
             $query->where(function ($builder): void {
                 $builder->whereNull('tenant_id')->orWhere('tenant_id', app(TenantContext::class)->id());

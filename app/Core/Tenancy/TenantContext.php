@@ -52,9 +52,12 @@ class TenantContext
             return (string) $user->role;
         }
 
-        return (string) $user->memberships()
+        $membership = $user->memberships()
             ->where('tenant_id', $this->id())
             ->where('status', 'active')
-            ->value('role');
+            ->with('roleDefinition')
+            ->first();
+
+        return (string) ($membership?->roleDefinition?->slug ?: $membership?->role);
     }
 }

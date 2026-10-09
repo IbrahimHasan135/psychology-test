@@ -58,7 +58,7 @@
                         <h2>Accounts</h2>
                         <p>Manage account identity and access assignments.</p>
                     </div>
-                    <span class="pill">{{ $users->total() }} accounts</span>
+                    <span class="pill">{{ $users->count() }} accounts shown</span>
                 </div>
                 <div class="table-wrap embedded-table">
                     <table class="admin-table">

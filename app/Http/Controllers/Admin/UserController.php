@@ -13,19 +13,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Support\Audit;
 
 class UserController extends Controller
 {
     public function index(AddonRegistry $addons): View
     {
-        $rolePermissions = DB::table('role_addon_permissions')
-            ->get()
+        $permissionQuery = DB::table('role_addon_permissions');
+        $context = app(TenantContext::class);
+        if ($context->isScopedRequest()) {
+            $permissionQuery->where(function ($query) use ($context): void {
+                $query->whereNull('tenant_id')->orWhere('tenant_id', $context->id());
+            });
+        }
+        $rolePermissions = $permissionQuery->get()
             ->groupBy('role');
         $currentUser = auth()->user();
         $roles = Role::query()->orderByDesc('is_system')->orderBy('name')->get();
 
         $users = User::query();
-        $context = app(TenantContext::class);
         if ($context->isScopedRequest()) {
             $users->whereHas('memberships', fn ($query) => $query
                 ->where('tenant_id', $context->id())
@@ -33,7 +39,7 @@ class UserController extends Controller
         }
 
         return view('admin.users.index', [
-            'users' => $users->latest()->paginate(10),
+            'users' => $users->orderByDesc('id')->cursorPaginate(50),
             'roles' => $roles,
             'creatableRoles' => $roles->filter(fn (Role $role) => $currentUser?->canCreateRole($role->slug)),
             'addonPermissions' => $addons->permissions()->groupBy('addon_name'),
@@ -48,8 +54,10 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
-            'role' => ['required', 'string', 'exists:roles,slug'],
+            'role' => ['required', 'string'],
         ]);
+
+        $roleRecord = Role::query()->where('slug', $data['role'])->firstOrFail();
 
         if (! $request->user()?->canCreateRole($data['role'])) {
             return back()->withErrors('You are not allowed to create accounts with that role.')->withInput();
@@ -65,11 +73,14 @@ class UserController extends Controller
             $user->memberships()->create([
                 'tenant_id' => app(TenantContext::class)->id(),
                 'role' => $role,
+                'role_id' => $roleRecord->id,
                 'status' => 'active',
                 'display_name' => $user->name,
                 'joined_at' => now(),
             ]);
         }
+
+        Audit::record('user.created', $user, ['role' => $role]);
 
         return redirect()->to(nova_route('admin.users.index'))->with('status', 'Account created.');
     }
@@ -99,6 +110,7 @@ class UserController extends Controller
         }
 
         $user->update($data);
+        Audit::record('user.updated', $user);
 
         return redirect()->to(nova_route('admin.users.index'))->with('status', 'Account updated.');
     }
@@ -112,6 +124,8 @@ class UserController extends Controller
         }
 
         $user->delete();
+        $user->memberships()->update(['status' => 'disabled']);
+        Audit::record('user.deleted', $user);
 
         return redirect()->to(nova_route('admin.users.index'))->with('status', 'Account deleted.');
     }

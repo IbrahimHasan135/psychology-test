@@ -12,7 +12,7 @@ class RunDatabaseMigrations
 {
     public function handle($request, Closure $next)
     {
-        if (config('database.auto_migrate')) {
+        if (config('database.auto_migrate') && app()->environment(['local', 'testing'])) {
             $this->runMigrationsAndSeeders();
         }
 

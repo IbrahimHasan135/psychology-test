@@ -10,6 +10,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use App\Support\Audit;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -28,8 +30,11 @@ class LoginController extends Controller
         ]);
 
         $user = User::query()
-            ->where('username', $credentials['login'])
-            ->orWhere('email', $credentials['login'])
+            ->where('status', 'active')
+            ->where(function ($query) use ($credentials): void {
+                $query->where('username', $credentials['login'])
+                    ->orWhere('email', $credentials['login']);
+            })
             ->first();
 
         if ($user === null || ! Hash::check($credentials['password'], $user->password)) {
@@ -66,6 +71,10 @@ class LoginController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
+        if (Schema::hasColumn('users', 'last_login_at')) {
+            $user->forceFill(['last_login_at' => now()])->saveQuietly();
+        }
+        Audit::record('auth.login', $user, ['scoped' => $context->isScopedRequest()]);
 
         if ($context->isScopedRequest()) {
             $request->session()->put('novabase.active_tenant_slug', $context->tenant()?->slug);
@@ -89,7 +98,9 @@ class LoginController extends Controller
             return redirect()->route('tenant.home', ['tenant' => $context->tenant()->slug]);
         }
 
+        $user = $request->user();
         Auth::logout();
+        Audit::record('auth.logout', $user);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
