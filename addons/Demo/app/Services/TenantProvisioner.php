@@ -36,11 +36,6 @@ class TenantProvisioner
                 'joined_at' => now(),
             ]);
 
-            DB::table('tenant_addons')->updateOrInsert(
-                ['tenant_id' => $tenant->id, 'addon_slug' => 'demo'],
-                ['status' => 'active', 'created_at' => now(), 'updated_at' => now()]
-            );
-
             SitePage::query()->withoutGlobalScopes()->create([
                 'tenant_id' => $tenant->id,
                 'name' => 'Home',

@@ -11,13 +11,6 @@ Route::middleware(['resolve.tenant', 'auth', 'role:super_admin,admin', 'permissi
         Route::get('/', DemoController::class)->name('index');
     });
 
-Route::middleware(['resolve.tenant', 'auth', 'tenant.member', 'role:super_admin,admin', 'permission:demo.view'])
-    ->prefix('{tenant}/admin/addons/demo')
-    ->name('tenant.admin.addons.demo.')
-    ->group(function (): void {
-        Route::get('/', DemoController::class)->name('index');
-    });
-
 Route::middleware(['resolve.tenant', 'auth', 'role:super_admin', 'permission:demo.view'])
     ->prefix('admin/addons/demo/tenants')
     ->name('admin.addons.demo.tenants.')

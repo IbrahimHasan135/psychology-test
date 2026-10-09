@@ -3,6 +3,7 @@
 namespace App\Core\Addons;
 
 use App\Models\User;
+use App\Core\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 
@@ -46,6 +47,15 @@ class AddonRegistry
         return $this->all()->filter(fn (AddonMeta $addon) => $addon->enabled);
     }
 
+    public function available(): Collection
+    {
+        $isTenantRequest = app(TenantContext::class)->isScopedRequest();
+
+        return $this->enabled()->filter(
+            fn (AddonMeta $addon) => ! $isTenantRequest || $addon->scope !== 'platform'
+        );
+    }
+
     public function find(string $slug): ?AddonMeta
     {
         return $this->enabled()->get($slug);
@@ -53,7 +63,7 @@ class AddonRegistry
 
     public function adminMenuFor(?User $user): Collection
     {
-        return $this->enabled()
+        return $this->available()
             ->filter(fn (AddonMeta $addon) => $user?->canAccessAddon($addon->slug))
             ->map(function (AddonMeta $addon) use ($user) {
                 return [
@@ -69,7 +79,7 @@ class AddonRegistry
 
     public function dashboardCardsFor(?User $user): Collection
     {
-        return $this->enabled()
+        return $this->available()
             ->filter(fn (AddonMeta $addon) => $user?->canAccessAddon($addon->slug))
             ->flatMap(function (AddonMeta $addon) use ($user) {
                 return collect($addon->dashboardCards)
@@ -85,7 +95,7 @@ class AddonRegistry
 
     public function permissions(): Collection
     {
-        return $this->enabled()
+        return $this->available()
             ->flatMap(fn (AddonMeta $addon) => collect($addon->permissions)->map(fn (string $permission) => [
                 'addon' => $addon->slug,
                 'addon_name' => $addon->name,
@@ -98,7 +108,7 @@ class AddonRegistry
     {
         $definitions = [];
 
-        foreach ($this->enabled() as $addon) {
+        foreach ($this->available() as $addon) {
             foreach ($addon->webEditorBlocks as $registration) {
                 $class = $registration["definition"] ?? null;
                 $permission = $registration["permission"] ?? null;

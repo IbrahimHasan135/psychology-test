@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Core\Tenancy\TenantContext;
+use App\Core\Addons\AddonRegistry;
 use App\Models\Tenant;
 
 class User extends Authenticatable
@@ -179,13 +180,17 @@ class User extends Authenticatable
             return true;
         }
 
+        $addonSlug = str($permission)->before('.')->toString();
+        $addon = app(AddonRegistry::class)->find($addonSlug);
+        if ($addon?->scope === 'platform' && app(TenantContext::class)->isScopedRequest()) {
+            return false;
+        }
+
         if (! Schema::hasTable('role_addon_permissions')) {
             return false;
         }
 
         if (app(TenantContext::class)->isScopedRequest() && $this->effectiveRole() === UserRole::SUPER_ADMIN) {
-            $addonSlug = str($permission)->before('.')->toString();
-
             return DB::table('tenant_addons')
                 ->where('tenant_id', app(TenantContext::class)->id())
                 ->where('addon_slug', $addonSlug)
@@ -207,6 +212,11 @@ class User extends Authenticatable
 
     public function canAccessAddon(string $addonSlug): bool
     {
+        $addon = app(AddonRegistry::class)->find($addonSlug);
+        if ($addon?->scope === 'platform' && app(TenantContext::class)->isScopedRequest()) {
+            return false;
+        }
+
         if ($this->isPlatformSuperAdmin()) {
             return true;
         }

@@ -7,6 +7,7 @@ return [
     'name' => 'Demo Addon',
     'description' => 'NovaBase sample addon for validating sidebar, dashboard, routes, views, and permissions.',
     'icon' => 'package',
+    'scope' => 'platform',
     'admin_menu' => [
         [
             'label' => 'Overview',

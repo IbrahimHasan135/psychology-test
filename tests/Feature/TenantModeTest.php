@@ -118,13 +118,12 @@ class TenantModeTest extends TestCase
             'name' => 'GBI Home Updated',
         ]);
 
-        $this->assertDatabaseHas('tenant_addons', [
+        $this->assertDatabaseMissing('tenant_addons', [
             'tenant_id' => $tenant->id,
             'addon_slug' => 'demo',
-            'status' => 'active',
         ]);
 
-        $this->get(route('tenant.admin.addons.demo.index', ['tenant' => 'gbi']))->assertOk();
+        $this->get('/gbi/admin/addons/demo')->assertNotFound();
     }
 
     public function test_public_tenant_signup_creates_owner_and_redirects_to_tenant_login(): void
