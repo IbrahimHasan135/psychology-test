@@ -88,4 +88,4 @@ Untuk perubahan implementasi berikutnya, jalankan pemeriksaan sesuai dampak:
 - Periksa diff agar tidak ada perubahan di luar scope; gunakan `git diff --check` jika Git tersedia.
 - Catat hasil aktual, kegagalan, serta pemeriksaan yang belum dijalankan beserta alasannya. Jangan menginstal dependency atau menjalankan migrasi/seeder secara otomatis untuk menutupi runtime yang belum siap.
 
-Pekerjaan selesai ketika perubahan tetap dalam scope, perilaku existing terjaga, pemeriksaan relevan tercatat, dan changelog lengkap. Jika terblokir core, laporkan sebagai parsial/PENDING CORE, bukan mengklaim fitur selesai.
+Pekerjaan selesai ketika perubahan tetap dalam scope, perilaku existing terjaga, pemeriksaan relevan tercatat, changelog lengkap, serta perubahan task sudah di-commit dan di-push ke branch kerja di origin. Ikuti prosedur commit/push per task pada `AGENTS.md`, termasuk verifikasi SHA remote dan pelaporan kendala. Otorisasi otomatis ini tidak mencakup merge, force push atau push ke main/master/upstream. Jika terblokir core, laporkan sebagai parsial/PENDING CORE, bukan mengklaim fitur selesai.

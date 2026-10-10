@@ -57,6 +57,24 @@ Warning core: tidak ada perubahan source core, route, schema migration, dependen
 
 Rollback setup: hentikan proses server lokal milik setup; folder generated yang diabaikan Git dapat dibersihkan secara selektif. Jangan menghapus database atau `.env` setelah dipakai developer tanpa meninjau data dan membuat backup. Jangan gunakan reset repo yang menghapus pekerjaan lain.
 
+## 2026-10-11 - Commit dan push wajib setiap task/prompt
+
+Status: ATURAN SELESAI; hasil push dilaporkan pada respons akhir setelah verifikasi remote.
+
+Permintaan: pemilik repo mengotorisasi commit dan push otomatis setiap selesai satu prompt agar developer junior tidak lupa menyimpan setiap perubahan.
+
+| File | Perubahan | Dampak |
+| --- | --- | --- |
+| `AGENTS.md` | Mewajibkan commit/push per task, staging terpilih, verifikasi SHA remote, pelaporan kegagalan; mengganti larangan push lama dengan otorisasi eksplisit | Developer/agent tidak perlu meminta izin push lagi ke branch kerja origin |
+| `docs/WEBSITE_EDITOR_DEVELOPMENT_SCOPE.md` | Menambahkan commit dan push sebagai kriteria selesai | Scope Card/Template dan perlindungan core tetap berlaku |
+| `docs/WEBSITE_EDITOR_CHANGELOG.md` | Mencatat aturan baru dan menambahkan kolom pelaporan commit/push pada format entri | Handoff dapat membedakan commit lokal dan push berhasil |
+
+Branch aktual menurut Git: `feat/web-editor-frontend`. Ini memperbarui referensi historis `feat/website-editor-frontend` dalam analisis awal. Tujuan origin: `muhaldianmaharani/novabase-product`; upstream bukan tujuan push otomatis.
+
+Verifikasi: Git ditemukan pada instalasi GitHub Desktop; status dan diff ditinjau, git diff --check lolos. Perubahan setup sesi sebelumnya disimpan terpisah pada commit `cb51d45`. Perubahan task ini hanya dokumentasi; tidak membutuhkan pengulangan test runtime. SHA commit aturan dan hasil verifikasi SHA remote disampaikan di laporan akhir supaya tidak membuat commit tambahan hanya untuk mencatat SHA commit itu sendiri.
+
+Warning core: tidak ada. Larangan force push dan push otomatis ke main/master/upstream tetap berlaku. Jika akses push gagal, commit lokal dipertahankan dan kendala dilaporkan.
+
 ## Format entri pekerjaan berikutnya
 
 ```markdown
@@ -65,6 +83,7 @@ Rollback setup: hentikan proses server lokal milik setup; folder generated yang 
 Status: SELESAI / PARSIAL / PENDING CORE
 Pelaksana:
 Branch dan referensi commit (jika tersedia):
+Commit/push: branch tujuan, hasil push, SHA lokal/remote (boleh dirujuk ke laporan akhir).
 Permintaan/tujuan:
 
 | File dan bagian/fungsi | Perubahan aktual sebelum -> sesudah | Alasan/dampak |
