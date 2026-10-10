@@ -180,6 +180,246 @@ After changing tenancy configuration, clear cached configuration:
 
 The Demo addon provides a platform-only tenant management screen at `Admin Panel > Demo Addon > Manage Demo Tenants`. The platform Super Admin can create and inspect tenants. A tenant owner uses the tenant URL and receives the tenant-scoped `super_admin` role; this is not the platform Super Admin and cannot see platform-only addon screens.
 
+## Deployment Growth Path
+
+NovaBase can be deployed in three stages. The application and tenant model do
+not need to change when moving from one stage to the next; the infrastructure
+and environment configuration become stronger as traffic grows.
+
+### Stage A: Shared Hosting
+
+This is suitable for an initial product, a small-to-medium number of users,
+and one application server.
+
+```text
+One hosting account
+  - psychology.example.com -> one NovaBase installation and database
+  - gerejahub.com          -> another NovaBase installation and database
+  - other-product.com      -> another NovaBase installation and database
+```
+
+For one multi-tenant product, all tenants can remain inside one installation:
+
+```text
+gerejahub.com
+  - tenant_id = 1 (GBI)
+  - tenant_id = 2 (HKBP)
+  - tenant_id = 3 (GPDI)
+```
+
+Required:
+
+- PHP 8.2 or newer, Composer, Apache or a compatible web server, and MySQL/MariaDB.
+- One database per product installation.
+- The document root should point to `public/`. The repository also includes a
+  subfolder entrypoint for hosting environments where the document root cannot
+  be changed.
+- A writable `storage/` and `bootstrap/cache/` directory.
+- `.env` configured with the hosting database credentials.
+- HTTPS enabled for login and session security.
+- Scheduled backups from the hosting control panel or an external backup job.
+
+Recommended local/shared-hosting environment:
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+DB_AUTO_MIGRATE=false
+DB_AUTO_SEED=false
+SESSION_DRIVER=file
+CACHE_STORE=file
+QUEUE_CONNECTION=database
+```
+
+Deployment commands:
+
+```bash
+composer install --no-dev --optimize-autoloader
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed --force
+php artisan storage:link
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Do not enable request-time auto migration in production. Run migrations once
+from a controlled deployment process. Shared hosting can run NovaBase, but it
+usually cannot provide a load balancer, a permanent queue worker, Redis with
+full administration access, read replicas, or autoscaling.
+
+### Stage B: Single VPS
+
+Move to a VPS when the product needs more control, queue workers, Redis, or
+more predictable resources. A single VPS is still one application server, but
+it can run all supporting services:
+
+```text
+One VPS
+  - Nginx or Apache + PHP-FPM
+  - NovaBase Laravel application
+  - MySQL primary
+  - Redis
+  - Supervisor or systemd queue worker
+  - Cron
+  - Local or external backup target
+```
+
+Required configuration:
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://example.com
+DB_AUTO_MIGRATE=false
+DB_AUTO_SEED=false
+SESSION_DRIVER=redis
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+REDIS_HOST=127.0.0.1
+```
+
+The VPS must also provide:
+
+- PHP-FPM with the extensions required by Laravel and the project.
+- MySQL with regular backups and a least-privilege database user.
+- Redis protected by a password or private network rules.
+- A queue worker managed by Supervisor or systemd.
+- A cron entry for scheduled Laravel tasks.
+- TLS, firewall rules, log rotation, disk monitoring, and swap where needed.
+
+Example queue worker command:
+
+```bash
+php artisan queue:work redis --sleep=3 --tries=3 --timeout=120
+```
+
+The worker must be restarted after a deployment so it loads the new code:
+
+```bash
+php artisan queue:restart
+```
+
+Run production deployment in this order:
+
+1. Put the release code on the VPS.
+2. Run `composer install --no-dev --optimize-autoloader`.
+3. Run `php artisan migrate --force` once.
+4. Run `php artisan optimize` or the individual cache commands.
+5. Restart queue workers.
+6. Verify the health endpoint, login, database connection, and queue status.
+
+### Stage C: Multi-Server Production
+
+Use this stage when one VPS cannot handle the traffic or uptime requirement.
+The application remains stateless at the web-server layer:
+
+```text
+                    +----------------+
+Users -> HTTPS ->   | Load Balancer  |
+                    +--------+-------+
+                             |
+                 +-----------+-----------+
+                 |                       |
+          App Server 1             App Server 2
+                 |                       |
+                 +-----------+-----------+
+                             |
+             +---------------+----------------+
+             |                                |
+       Shared Redis                    MySQL Primary
+             |                                |
+       Queue workers                    Read Replica(s)
+```
+
+Every application server must use the same:
+
+- `APP_KEY`.
+- Database primary for writes.
+- Redis for sessions, cache, rate limiting, and queues.
+- Application release version.
+- Addon code and configuration.
+
+Example multi-server environment contract:
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://example.com
+APP_KEY=the-same-key-on-every-app-server
+DB_AUTO_MIGRATE=false
+DB_AUTO_SEED=false
+
+# Shared session and cache services
+SESSION_DRIVER=redis
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+REDIS_HOST=private-redis-host
+REDIS_PASSWORD=strong-password
+
+# Primary database for writes and consistency-sensitive reads
+DB_HOST=private-mysql-primary
+DB_DATABASE=novabase
+DB_USERNAME=novabase_app
+DB_PASSWORD=strong-password
+```
+
+Additional production services:
+
+- Load balancer with TLS termination, health checks, and sticky-session-free
+  routing.
+- Shared object storage such as S3-compatible storage for user uploads. Do not
+  rely on `storage/app` on one app server when uploads must be visible on all
+  servers.
+- Redis with memory limits, persistence policy, private networking, and
+  monitoring.
+- MySQL primary with tested backups and point-in-time recovery.
+- Optional read replicas for queries where replica lag is acceptable.
+- Queue workers running from a controlled worker pool, separate from web
+  traffic where possible.
+- Centralized logs, metrics, alerts, and deployment rollback capability.
+
+### Database Read and Write Rules
+
+The primary database remains the source of truth for:
+
+- Login and account status checks.
+- Tenant membership and role changes.
+- Permission changes.
+- Web Editor saves.
+- Tenant creation and provisioning.
+- Any transaction that must be immediately consistent.
+
+Read replicas may later handle reporting, public read-heavy pages, and other
+queries where a short replication delay is acceptable. Read replicas are not
+required for the first VPS deployment and should only be added after slow
+query and database load measurements justify them.
+
+### Migration Rules for All Stages
+
+- Commit migrations together with the code that uses them.
+- Run migrations once from one deployment runner, never concurrently from all
+  application servers.
+- Set `DB_AUTO_MIGRATE=false` in production.
+- Take a tested backup before destructive or large migrations.
+- Deploy additive schema changes before code that requires them.
+- Keep migrations compatible with the previous application version during a
+  rolling deployment.
+
+### What NovaBase Provides and What Hosting Provides
+
+NovaBase provides the Laravel application, tenant isolation, migrations,
+cache/queue configuration points, cursor pagination, page cache, permission
+cache, and deployment documentation. The hosting or cloud environment must
+provide the servers, DNS, TLS, load balancer, Redis service, MySQL service,
+backups, object storage, monitoring, and autoscaling.
+
+Docker images, CI/CD workflows, health-check endpoints, Supervisor files,
+read/write database connections, and object-storage adapters can be added as a
+separate deployment package when the project moves from Stage A to Stage B or
+Stage C. They are not prerequisites for using NovaBase on shared hosting.
+
 The complete contract is documented in `docs/NOVABASE_TENANCY.md`.
 
 The Web Editor save endpoint uses `POST` instead of `PUT` so it works through Apache/XAMPP and shared hosting configurations that reject PUT requests before Laravel receives them.
