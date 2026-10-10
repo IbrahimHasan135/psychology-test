@@ -143,6 +143,19 @@ class AddonRegistry
             ->filter(fn (string $path) => is_file($path));
     }
 
+    /** @return Collection<int, array{addon: AddonMeta, path: string}> */
+    public function publicRouteFiles(): Collection
+    {
+        return $this->enabled()
+            ->filter(fn (AddonMeta $addon) => $addon->publicRoutes)
+            ->map(fn (AddonMeta $addon) => [
+                'addon' => $addon,
+                'path' => $addon->path.DIRECTORY_SEPARATOR.$addon->publicRouteFile,
+            ])
+            ->filter(fn (array $route) => is_file($route['path']))
+            ->values();
+    }
+
     public function migrationPaths(): array
     {
         return $this->enabled()

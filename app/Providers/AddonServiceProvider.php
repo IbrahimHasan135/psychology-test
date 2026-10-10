@@ -45,5 +45,14 @@ class AddonServiceProvider extends ServiceProvider
             Route::middleware(['web'])
                 ->group($routeFile);
         }
+
+        foreach ($addons->publicRouteFiles() as $route) {
+            Route::middleware([
+                'web',
+                'resolve.tenant',
+                'addon.public:'.$route['addon']->slug,
+                'throttle:public-addon',
+            ])->name('addon.'.$route['addon']->slug.'.')->group($route['path']);
+        }
     }
 }

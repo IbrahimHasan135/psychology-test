@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
             'resolve.tenant' => \App\Http\Middleware\ResolveTenant::class,
             'tenant.member' => \App\Http\Middleware\EnsureTenantMembership::class,
+            'addon.public' => \App\Http\Middleware\EnsurePublicAddonAccess::class,
         ]);
 
         $middleware->priority([

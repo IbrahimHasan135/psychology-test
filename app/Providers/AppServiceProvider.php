@@ -30,5 +30,11 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(10)->by($login.'|'.$request->ip());
         });
+
+        RateLimiter::for('public-addon', function (Request $request): Limit {
+            $tenant = app(\App\Core\Tenancy\TenantContext::class)->tenant()?->slug ?? 'platform';
+
+            return Limit::perMinute(60)->by($tenant.'|'.$request->ip().'|'.$request->route()?->getName());
+        });
     }
 }

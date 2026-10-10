@@ -74,8 +74,63 @@ NovaBase includes a Laravel-native addon foundation inspired by NovaStore.
 - Addon migrations are loaded from `addons/AddonName/database/migrations`.
 - The admin sidebar and dashboard read addon menus and cards from addon manifests.
 - Roles control addon access through `role_addon_permissions`.
+- Addons may expose public pages without login through `routes/public.php`.
+- Public addon routes receive tenant resolution, addon-scope checks, and rate limiting automatically.
+- `PublicAccessToken` provides secure token generation and hashing; token records and submission tables remain owned by the addon.
 
 The current working example is `addons/Demo`.
+
+### Public Addon Pages
+
+An addon that needs a public form or token-based progress page can opt in from
+its manifest:
+
+```php
+'scope' => 'tenant',
+'public_routes' => [
+    'enabled' => true,
+    'route_file' => 'routes/public.php',
+],
+```
+
+Create `routes/public.php` inside the addon. The file is loaded with the
+`web`, `resolve.tenant`, `addon.public:{slug}`, and `throttle:public-addon`
+middleware. The addon controls its own URL structure and route names. Route
+names are automatically prefixed with `addon.{slug}.`.
+
+Example:
+
+```php
+use Illuminate\Support\Facades\Route;
+use Addons\Psychology\Http\Controllers\PublicIntakeController;
+
+Route::prefix('{tenant}/psychology')->group(function (): void {
+    Route::get('/intake', [PublicIntakeController::class, 'create'])->name('intake');
+    Route::post('/intake', [PublicIntakeController::class, 'store'])->name('intake.store');
+    Route::get('/progress/{token}', [PublicIntakeController::class, 'progress'])->name('progress');
+});
+```
+
+The resulting route names are `addon.psychology.intake`,
+`addon.psychology.intake.store`, and `addon.psychology.progress`. Generate
+links with:
+
+```php
+addon_public_url('psychology', 'intake', ['tenant' => $tenant->slug]);
+```
+
+For token-based access, use `App\Support\PublicAccessToken`:
+
+```php
+$plainToken = app(\App\Support\PublicAccessToken::class)->issue();
+$tokenHash = app(\App\Support\PublicAccessToken::class)->hash($plainToken);
+```
+
+Store only `$tokenHash` in an addon-owned table. Give the plain token to the
+visitor once through the generated URL. The addon is responsible for storing
+submission fields, token ownership, expiration, revocation, and authorization
+of the progress response. Never put patient names or sensitive data in the
+URL or use a database ID as a public credential.
 
 ## Role And User Management
 
